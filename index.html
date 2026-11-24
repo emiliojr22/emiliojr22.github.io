@@ -3,59 +3,72 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Minitools GIS · Herramientas GIS gratuitas online</title>
-<meta name="description" content="Herramientas GIS gratuitas que funcionan en tu navegador: conversor de coordenadas UTM, conversor de formatos KML, GeoJSON, Shapefile, CSV y Excel. Sin instalar nada y sin subir tus datos.">
-<style>
-  :root { --bg:#0f172a; --card:#1e293b; --acc:#22c55e; --txt:#e2e8f0; --mut:#94a3b8; --line:#334155; }
-  * { box-sizing:border-box; }
-  body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--txt); }
-  header { padding:56px 20px 24px; text-align:center; }
-  header h1 { margin:0; font-size:2.6rem; } header h1 span { color:var(--acc); }
-  header p { color:var(--mut); margin:12px auto 0; max-width:640px; font-size:1.1rem; line-height:1.5; }
-  .badges { display:flex; justify-content:center; flex-wrap:wrap; gap:10px; margin-top:20px; }
-  .badges span { border:1px solid var(--line); border-radius:999px; padding:6px 14px; font-size:.85rem; color:var(--mut); }
-  main { max-width:1100px; margin:0 auto; padding:24px 20px; display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:20px; }
-  .tool { display:block; background:var(--card); border:1px solid transparent; border-radius:16px; padding:24px; text-decoration:none; color:var(--txt); transition:.2s; }
-  .tool:hover { border-color:var(--acc); transform:translateY(-3px); }
-  .tool .ico { font-size:2rem; }
-  .tool h2 { margin:12px 0 8px; font-size:1.2rem; }
-  .tool p { margin:0; color:var(--mut); line-height:1.5; font-size:.95rem; }
-  .tool .go { display:inline-block; margin-top:16px; color:var(--acc); font-weight:700; }
-  .tool.soon { opacity:.55; pointer-events:none; }
-  .tool.soon .go { color:var(--mut); }
-  footer { text-align:center; color:var(--mut); font-size:.8rem; padding:36px 20px; }
-</style>
+<title>Minitools GIS · Herramientas GIS gratuitas en el navegador</title>
+<meta name="description" content="Herramientas GIS gratuitas que funcionan en tu navegador: conversor de coordenadas UTM y conversor de formatos KML, GeoJSON, Shapefile, CSV y Excel. Sin instalar nada y sin subir tus datos.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="assets/estilo.css">
 </head>
 <body>
-<header>
-  <h1>Minitools <span>GIS</span></h1>
-  <p>Herramientas geoespaciales gratuitas y sencillas para el día a día. Funcionan en tu navegador: sin instalar nada y sin subir tus datos a ningún servidor.</p>
-  <div class="badges"><span>🔒 100 % local</span><span>⚡ Sin registro</span><span>🇪🇸 ETRS89 / UTM</span></div>
+<header class="barra">
+  <a class="marca" href="./"><svg viewBox="0 0 26 26" aria-hidden="true"><path d="M13 3 23.5 22h-21Z" fill="none" stroke="#1E2B33" stroke-width="2"/><circle cx="13" cy="15.5" r="2.4" fill="#C4372C"/></svg>Minitools GIS</a>
+  <nav aria-label="Herramientas">
+    <a href="conversor-coordenadas/">Coordenadas</a>
+    <a href="conversor-formatos/">Formatos</a>
+  </nav>
 </header>
 
-<main>
-  <a class="tool" href="conversor-coordenadas/">
-    <div class="ico">🧭</div>
-    <h2>Conversor de coordenadas</h2>
-    <p>Pasa de geográficas WGS84 / ETRS89 a UTM y viceversa. Haz clic en el mapa para obtener las coordenadas de cualquier punto.</p>
-    <span class="go">Abrir herramienta →</span>
-  </a>
-
-  <a class="tool" href="conversor-formatos/">
-    <div class="ico">🔄</div>
-    <h2>Conversor de formatos</h2>
-    <p>Convierte entre KML, GeoJSON, GPX, Shapefile, CSV y Excel. Admite columnas WKT y coordenadas UTM, con vista previa en el mapa.</p>
-    <span class="go">Abrir herramienta →</span>
-  </a>
-
-  <div class="tool soon">
-    <div class="ico">🏠</div>
-    <h2>Consulta catastral masiva</h2>
-    <p>Obtén datos del Catastro a partir de un listado de referencias catastrales o coordenadas.</p>
-    <span class="go">Próximamente</span>
+<section class="relieve portada" data-relieve>
+  <div class="dentro">
+    <div class="cajetin">
+      <h1>Minitools GIS</h1>
+      <p>Herramientas de cartografía para el trabajo diario. Funcionan en tu navegador: no hay que instalar nada y tus archivos no salen de tu equipo.</p>
+    </div>
+    <div class="lectura" data-lectura aria-live="off">Mueve el cursor sobre el relieve para ver sus coordenadas.</div>
   </div>
-</main>
+</section>
 
-<footer>Minitools GIS · © 2026</footer>
+<section class="seccion" id="herramientas">
+  <h2>Herramientas</h2>
+  <p class="intro">Elige la que necesitas. Todas son gratuitas y no piden registro.</p>
+  <ul class="leyenda">
+    <li>
+      <a href="conversor-coordenadas/">
+        <svg viewBox="0 0 56 56" aria-hidden="true"><rect x="4" y="4" width="48" height="48" fill="#FBFCFA" stroke="#1E2B33"/><path d="M4 20h48M4 36h48M20 4v48M36 4v48" stroke="#1C6E9C" stroke-width="1"/><path d="M28 16v24M16 28h24" stroke="#C4372C" stroke-width="2"/><circle cx="28" cy="28" r="5" fill="none" stroke="#C4372C" stroke-width="2"/></svg>
+        <div><h3>Conversor de coordenadas</h3><p>Pasa de geográficas WGS84 o ETRS89 a UTM y al revés. Haz clic en el mapa para obtener las coordenadas de cualquier punto.</p></div>
+        <span class="abrir">Abrir</span>
+      </a>
+    </li>
+    <li>
+      <a href="conversor-formatos/">
+        <svg viewBox="0 0 56 56" aria-hidden="true"><path d="M8 38 28 48l20-10" fill="none" stroke="#A0612F" stroke-width="2"/><path d="M8 28 28 38l20-10" fill="none" stroke="#1C6E9C" stroke-width="2"/><path d="M8 18 28 8l20 10-20 10Z" fill="#FBFCFA" stroke="#1E2B33" stroke-width="2"/></svg>
+        <div><h3>Conversor de formatos</h3><p>Convierte entre KML, GeoJSON, GPX, Shapefile, CSV y Excel. Lee columnas WKT y coordenadas UTM, y te enseña el resultado en el mapa.</p></div>
+        <span class="abrir">Abrir</span>
+      </a>
+    </li>
+    <li>
+      <div class="pronto">
+        <svg viewBox="0 0 56 56" aria-hidden="true"><path d="M6 14 30 6l20 16-6 26-30 2Z" fill="#FBFCFA" stroke="#1E2B33" stroke-width="2"/><path d="M30 6 26 30l18 18M26 30 6 14M26 30l-12 20" fill="none" stroke="#A0612F" stroke-width="1.5"/></svg>
+        <div><h3>Consulta catastral masiva</h3><p>Datos del Catastro a partir de una lista de referencias catastrales o de coordenadas.</p></div>
+        <span class="estado">En preparación</span>
+      </div>
+    </li>
+  </ul>
+</section>
+
+<section class="seccion">
+  <div class="notas">
+    <div><h3>Tus datos se quedan contigo</h3><p>Los archivos se procesan en tu navegador. No se suben a ningún servidor, así que puedes usar información de clientes o de proyectos sin riesgo.</p></div>
+    <div><h3>Pensado para España</h3><p>ETRS89, UTM husos 28 a 31 y los formatos que se usan a diario en topografía, ingeniería y redes.</p></div>
+    <div><h3>Gratis y sin registro</h3><p>Abre la herramienta y úsala, sin crear ninguna cuenta ni dejar tu correo.</p></div>
+  </div>
+</section>
+
+<footer class="pie">
+  <span>Minitools GIS, 2026</span>
+  <span>Cartografía base de los mapas: © colaboradores de OpenStreetMap</span>
+</footer>
+<script src="assets/curvas.js"></script>
 </body>
 </html>
