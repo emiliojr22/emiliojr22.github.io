@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Minitools GIS · Conversor de coordenadas WGS84 ↔ UTM</title>
+<meta name="description" content="Herramientas GIS gratuitas online. Convierte coordenadas geográficas WGS84 / ETRS89 a UTM y viceversa, directamente en tu navegador.">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+  :root { --bg:#0f172a; --card:#1e293b; --acc:#22c55e; --txt:#e2e8f0; --mut:#94a3b8; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--txt); }
+  header { padding:28px 20px 10px; text-align:center; }
+  header h1 { margin:0; font-size:2rem; } header h1 span { color:var(--acc); }
+  header p { color:var(--mut); margin:6px 0 0; }
+  main { max-width:1100px; margin:0 auto; padding:20px; display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  @media (max-width:800px){ main { grid-template-columns:1fr; } }
+  .card { background:var(--card); border-radius:14px; padding:20px; }
+  h2 { margin-top:0; font-size:1.15rem; }
+  label { display:block; font-size:.85rem; color:var(--mut); margin:10px 0 4px; }
+  input, select { width:100%; padding:9px 10px; border-radius:8px; border:1px solid #334155; background:#0b1220; color:var(--txt); font-size:1rem; }
+  .row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  button { margin-top:14px; padding:10px 16px; border:0; border-radius:8px; background:var(--acc); color:#052e16; font-weight:700; cursor:pointer; }
+  .out { margin-top:14px; padding:12px; background:#0b1220; border-radius:8px; font-family:ui-monospace,Consolas,monospace; min-height:44px; white-space:pre-wrap; }
+  #map { height:420px; border-radius:14px; }
+  .hint { color:var(--mut); font-size:.85rem; margin-top:8px; }
+  footer { text-align:center; color:var(--mut); font-size:.8rem; padding:24px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Minitools <span>GIS</span></h1>
+  <p>Herramientas geoespaciales gratuitas que funcionan en tu navegador · tus datos no salen de tu ordenador</p>
+</header>
+
+<main>
+  <section class="card">
+    <h2>Geográficas (WGS84 / ETRS89) → UTM</h2>
+    <div class="row">
+      <div><label>Latitud (º)</label><input id="lat" type="number" step="any" value="40.4168"></div>
+      <div><label>Longitud (º)</label><input id="lon" type="number" step="any" value="-3.7038"></div>
+    </div>
+    <button onclick="geoToUtm()">Convertir a UTM</button>
+    <div class="out" id="outUtm"></div>
+
+    <h2 style="margin-top:26px">UTM → Geográficas</h2>
+    <div class="row">
+      <div><label>X (Este, m)</label><input id="x" type="number" step="any" value="440291"></div>
+      <div><label>Y (Norte, m)</label><input id="y" type="number" step="any" value="4474254"></div>
+    </div>
+    <div class="row">
+      <div><label>Huso</label><input id="zone" type="number" min="1" max="60" value="30"></div>
+      <div><label>Hemisferio</label><select id="hem"><option value="N">Norte</option><option value="S">Sur</option></select></div>
+    </div>
+    <button onclick="utmToGeo()">Convertir a geográficas</button>
+    <div class="out" id="outGeo"></div>
+  </section>
+
+  <section class="card">
+    <h2>Mapa</h2>
+    <div id="map"></div>
+    <p class="hint">Haz clic en el mapa para obtener sus coordenadas en ambos sistemas.</p>
+  </section>
+</main>
+
+<footer>Minitools GIS · versión de prueba · Elipsoide WGS84/GRS80 (diferencia despreciable para ETRS89)</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+// --- Transformación UTM (fórmulas de Krüger / USGS) ---
+const a = 6378137, f = 1/298.257223563, k0 = 0.9996;
+const e2 = f*(2-f), ep2 = e2/(1-e2), rad = Math.PI/180;
+
+function toUtm(lat, lon) {
+  const zone = Math.floor((lon + 180)/6) + 1;
+  const lon0 = ((zone-1)*6 - 180 + 3) * rad;
+  const phi = lat*rad, lam = lon*rad;
+  const N = a/Math.sqrt(1 - e2*Math.sin(phi)**2);
+  const T = Math.tan(phi)**2, C = ep2*Math.cos(phi)**2, A = Math.cos(phi)*(lam - lon0);
+  const M = a*((1 - e2/4 - 3*e2**2/64 - 5*e2**3/256)*phi
+            - (3*e2/8 + 3*e2**2/32 + 45*e2**3/1024)*Math.sin(2*phi)
+            + (15*e2**2/256 + 45*e2**3/1024)*Math.sin(4*phi)
+            - (35*e2**3/3072)*Math.sin(6*phi));
+  const x = k0*N*(A + (1-T+C)*A**3/6 + (5-18*T+T**2+72*C-58*ep2)*A**5/120) + 500000;
+  let y = k0*(M + N*Math.tan(phi)*(A**2/2 + (5-T+9*C+4*C**2)*A**4/24 + (61-58*T+T**2+600*C-330*ep2)*A**6/720));
+  if (lat < 0) y += 10000000;
+  return { x, y, zone, hem: lat >= 0 ? 'N' : 'S' };
+}
+
+function toGeo(x, y, zone, hem) {
+  x -= 500000; if (hem === 'S') y -= 10000000;
+  const lon0 = ((zone-1)*6 - 180 + 3) * rad;
+  const M = y/k0, mu = M/(a*(1 - e2/4 - 3*e2**2/64 - 5*e2**3/256));
+  const e1 = (1 - Math.sqrt(1-e2))/(1 + Math.sqrt(1-e2));
+  const phi1 = mu + (3*e1/2 - 27*e1**3/32)*Math.sin(2*mu) + (21*e1**2/16 - 55*e1**4/32)*Math.sin(4*mu)
+             + (151*e1**3/96)*Math.sin(6*mu) + (1097*e1**4/512)*Math.sin(8*mu);
+  const N1 = a/Math.sqrt(1 - e2*Math.sin(phi1)**2), T1 = Math.tan(phi1)**2, C1 = ep2*Math.cos(phi1)**2;
+  const R1 = a*(1-e2)/Math.pow(1 - e2*Math.sin(phi1)**2, 1.5), D = x/(N1*k0);
+  const lat = phi1 - (N1*Math.tan(phi1)/R1)*(D**2/2 - (5+3*T1+10*C1-4*C1**2-9*ep2)*D**4/24
+            + (61+90*T1+298*C1+45*T1**2-252*ep2-3*C1**2)*D**6/720);
+  const lon = lon0 + (D - (1+2*T1+C1)*D**3/6 + (5-2*C1+28*T1-3*C1**2+8*ep2+24*T1**2)*D**5/120)/Math.cos(phi1);
+  return { lat: lat/rad, lon: lon/rad };
+}
+
+// --- Interfaz ---
+const map = L.map('map').setView([40.4168, -3.7038], 6);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, attribution:'© OpenStreetMap' }).addTo(map);
+const marker = L.marker([40.4168, -3.7038]).addTo(map);
+
+function show(lat, lon) {
+  const u = toUtm(lat, lon);
+  document.getElementById('outUtm').textContent =
+    'Huso ' + u.zone + u.hem + '\nX = ' + u.x.toFixed(2) + ' m\nY = ' + u.y.toFixed(2) + ' m';
+  marker.setLatLng([lat, lon]);
+  return u;
+}
+function geoToUtm() {
+  const lat = parseFloat(document.getElementById('lat').value), lon = parseFloat(document.getElementById('lon').value);
+  if (isNaN(lat) || isNaN(lon) || Math.abs(lat) > 84) return alertOut('outUtm', 'Coordenadas no válidas (UTM: latitud entre -80º y 84º)');
+  show(lat, lon); map.setView([lat, lon], 12);
+}
+function utmToGeo() {
+  const x = parseFloat(document.getElementById('x').value), y = parseFloat(document.getElementById('y').value);
+  const zone = parseInt(document.getElementById('zone').value), hem = document.getElementById('hem').value;
+  if (isNaN(x) || isNaN(y) || !(zone >= 1 && zone <= 60)) return alertOut('outGeo', 'Datos no válidos');
+  const g = toGeo(x, y, zone, hem);
+  document.getElementById('outGeo').textContent = 'Latitud  = ' + g.lat.toFixed(7) + 'º\nLongitud = ' + g.lon.toFixed(7) + 'º';
+  marker.setLatLng([g.lat, g.lon]); map.setView([g.lat, g.lon], 12);
+}
+function alertOut(id, msg) { document.getElementById(id).textContent = '⚠ ' + msg; }
+
+map.on('click', e => {
+  const { lat, lng } = e.latlng;
+  document.getElementById('lat').value = lat.toFixed(7);
+  document.getElementById('lon').value = lng.toFixed(7);
+  const u = show(lat, lng);
+  document.getElementById('x').value = u.x.toFixed(2);
+  document.getElementById('y').value = u.y.toFixed(2);
+  document.getElementById('zone').value = u.zone;
+  document.getElementById('hem').value = u.hem;
+  document.getElementById('outGeo').textContent = 'Latitud  = ' + lat.toFixed(7) + 'º\nLongitud = ' + lng.toFixed(7) + 'º';
+});
+geoToUtm();
+</script>
+</body>
+</html>
