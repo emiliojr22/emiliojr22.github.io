@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es" data-raiz="../" data-herramienta="duplicados">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-i18n="du.titulo">Buscador de duplicados GIS online: puntos y geometrías repetidas | Minitools GIS</title>
+<meta name="description" content="Encuentra elementos repetidos en tus capas GIS: puntos a menos de una distancia, geometrías iguales o valores repetidos en un campo. Descarga los datos limpios." data-i18n-attr="content:du.desc">
+<meta name="view-transition" content="same-origin">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="../assets/estilo.css">
+<script src="../assets/carrusel.js"></script>
+</head>
+<body>
+<header class="barra">
+  <a class="marca" href="../" data-dir="atras"><svg viewBox="0 0 26 26" aria-hidden="true"><path d="M13 3 23.5 22h-21Z" fill="none" stroke="#1E2B33" stroke-width="2"/><circle cx="13" cy="15.5" r="2.4" fill="#C4372C"/></svg>Minitools GIS</a>
+  <div class="idioma" role="group" aria-label="Idioma / Language">
+    <button type="button" data-lang="es" lang="es" title="Español">ES</button>
+    <button type="button" data-lang="en" lang="en" title="English">EN</button>
+  </div>
+</header>
+
+<section class="relieve franja" data-relieve>
+  <div class="dentro">
+    <div class="cajetin">
+      <h1 data-i18n="h.duplicados">Buscador de duplicados</h1>
+      <p data-i18n="du.sub">Encuentra puntos, geometrías o valores repetidos y descarga los datos limpios.</p>
+    </div>
+  </div>
+</section>
+
+<nav class="carrusel"></nav>
+<main class="trabajo">
+  <div>
+    <section class="panel">
+      <h2 data-i18n="ca.tit">1. Carga tu archivo</h2>
+      <p class="ayuda" data-i18n="ca.ayuda">El archivo se lee en tu navegador y no se sube a ningún sitio.</p>
+      <div class="soltar" id="drop" role="button" tabindex="0">
+        <span data-i18n-html="ca.soltar"><strong>Arrastra aquí tu archivo</strong> o haz clic para elegirlo</span>
+        <small data-i18n="ca.tipos">GeoJSON, KML, GPX, CSV, Excel o Shapefile comprimido en .zip</small>
+      </div>
+      <input type="file" id="file" class="oculto" accept=".geojson,.json,.kml,.gpx,.csv,.txt,.xlsx,.xls,.zip">
+      <div class="resultado" id="info" aria-live="polite"><span data-i18n="ca.vacio">Todavía no has cargado ningún archivo.</span></div>
+    </section>
+
+    <section class="panel oculto" id="tabular">
+      <h2 data-i18n="ca.col.tit">Indica dónde están las coordenadas</h2>
+      <p class="ayuda" data-i18n="ca.col.ayuda">Hemos propuesto las columnas que parecen coordenadas. Cámbialas si no son correctas.</p>
+      <label for="mode" data-i18n="ca.modo">Las coordenadas están en</label>
+      <select id="mode"><option value="xy" data-i18n="ca.modo.xy">Dos columnas, X e Y</option><option value="wkt" data-i18n="ca.modo.wkt">Una columna WKT</option></select>
+      <div id="xyBox" class="fila">
+        <div><label for="colX" data-i18n="ca.colx">Columna X o longitud</label><select id="colX"></select></div>
+        <div><label for="colY" data-i18n="ca.coly">Columna Y o latitud</label><select id="colY"></select></div>
+      </div>
+      <div id="wktBox" class="oculto"><label for="colWkt" data-i18n="ca.colwkt">Columna WKT</label><select id="colWkt"></select></div>
+      <div class="fila">
+        <div><label for="crs" data-i18n="ca.crs">Sistema de coordenadas</label><select id="crs"><option value="geo" data-i18n="ca.crs.geo">Geográficas WGS84 o ETRS89</option><option value="utm" data-i18n="ca.crs.utm">UTM ETRS89 o WGS84</option></select></div>
+        <div id="zoneBox" class="oculto"><label for="zone" data-i18n="ca.huso">Huso UTM (norte)</label><input id="zone" type="number" min="1" max="60" value="30"></div>
+      </div>
+      <button class="boton" id="apply" type="button" data-i18n="ca.aplicar">Aplicar columnas</button>
+    </section>
+
+    <section class="panel">
+      <h2 data-i18n="du.crit.tit">2. Elige qué es un duplicado</h2>
+      <p class="ayuda" data-i18n="du.crit.ayuda">Se considera repetido todo elemento que coincide con otro anterior según este criterio.</p>
+      <label for="criterio" data-i18n="du.criterio">Criterio</label>
+      <select id="criterio">
+        <option value="pos" data-i18n="du.c.pos">Misma posición</option>
+        <option value="attr" data-i18n="du.c.attr">Mismo valor en un campo</option>
+        <option value="ambos" data-i18n="du.c.ambos">Misma posición y mismo valor</option>
+      </select>
+      <div class="fila">
+        <div id="tolBox"><label for="tol" data-i18n="du.tol">Tolerancia, en metros</label><input id="tol" type="number" min="0" step="any" value="1"></div>
+        <div id="campoBox" class="oculto"><label for="campo" data-i18n="du.campo">Campo</label><select id="campo"></select></div>
+      </div>
+      <label class="casilla" id="normBox"><input type="checkbox" id="norm" checked> <span data-i18n="du.norm">Ignorar mayúsculas, acentos y espacios al comparar textos</span></label>
+      <button class="boton" id="buscar" type="button" disabled data-i18n="du.buscar">Buscar duplicados</button>
+      <div class="resultado" id="resDup" aria-live="polite"><span data-i18n="du.espera">Carga un archivo para empezar.</span></div>
+      <div class="tabla-grupos" id="grupos"></div>
+    </section>
+
+    <section class="panel">
+      <h2 data-i18n="du.desc.tit">3. Descarga el resultado</h2>
+      <p class="ayuda" data-i18n="du.desc.ayuda">Los datos limpios conservan el primer elemento de cada grupo. El informe incluye todos los elementos con su grupo.</p>
+      <div class="fila">
+        <div><label for="fmtLimpio" data-i18n="du.formato">Formato</label>
+          <select id="fmtLimpio"><option value="geojson">GeoJSON</option><option value="kml">KML</option><option value="shp">Shapefile (.zip)</option><option value="csv" data-i18n="fo.csv">CSV con WKT</option><option value="xlsx">Excel</option></select></div>
+      </div>
+      <div class="fmts">
+        <button type="button" id="bajarLimpio" disabled data-i18n="du.bajar.limpio">Descargar sin duplicados</button>
+        <button type="button" id="bajarInforme" disabled data-i18n="du.bajar.informe">Descargar informe (Excel)</button>
+      </div>
+    </section>
+  </div>
+
+  <section class="mapa">
+    <div class="marco"><div id="map" role="region" aria-label="Mapa de duplicados" data-i18n-attr="aria-label:du.mapa"></div></div>
+    <p class="nota leyenda-mapa"><span class="punto rep"></span><span data-i18n="du.ley.rep">Repetidos</span> <span class="punto uni"></span><span data-i18n="du.ley.uni">Únicos</span></p>
+  </section>
+</main>
+
+<footer class="pie">
+  <span>Minitools GIS, 2026</span>
+  <span data-i18n="pie.local">Los archivos se procesan en tu navegador y no se suben a ningún servidor.</span>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/shpjs@6.2.0/dist/shp.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mapbox/shp-write@0.4.3/shpwrite.js"></script>
+<script src="../assets/i18n.js"></script>
+<script src="../assets/geo.js"></script>
+<script src="../assets/carga.js"></script>
+
+<script src="../assets/curvas.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const map = L.map('map').setView([40.4, -3.7], 5);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(map);
+const ROJO = '#C4372C', GRIS = '#55636B';
+let FC = null, base = 'datos', capa = null, grupoDe = null, grupos = [], ultimo = null;
+
+// ---------- Interfaz ----------
+function sincronizar() {
+  const c = $('criterio').value;
+  $('tolBox').classList.toggle('oculto', c === 'attr');
+  $('campoBox').classList.toggle('oculto', c === 'pos');
+  $('normBox').classList.toggle('oculto', c === 'pos');
+}
+$('criterio').addEventListener('change', sincronizar);
+function activar(on) { $('buscar').disabled = !on; }
+function activarDescargas(on) { $('bajarLimpio').disabled = !on; $('bajarInforme').disabled = !on; }
+
+Carga.iniciar({
+  alCargar(fc, b) {
+    FC = fc; base = b; grupoDe = null; grupos = []; ultimo = null;
+    const campos = {}; fc.features.forEach(f => Object.keys(f.properties || {}).forEach(k => campos[k] = 1));
+    $('campo').innerHTML = Object.keys(campos).map(k => '<option>' + Geo.esc(k) + '</option>').join('');
+    activar(fc.features.length > 0); activarDescargas(false);
+    $('grupos').innerHTML = '';
+    pintarMapa();
+    buscar();
+  },
+  alError() { FC = null; activar(false); activarDescargas(false); }
+});
+
+// ---------- Algoritmo ----------
+function normalizar(v, norm) {
+  let s = String(v == null ? '' : v).trim();
+  if (norm) s = s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ');
+  return s;
+}
+function puntoDe(g) {
+  if (!g) return null;
+  if (g.type === 'Point') return g.coordinates;
+  return null;
+}
+function firma(g, tol) { // geometrías no puntuales: coordenadas redondeadas a la tolerancia
+  const c0 = JSON.stringify(g.coordinates || g.geometries || '').match(/-?\d+(\.\d+)?,-?\d+(\.\d+)?/);
+  const lat = c0 ? parseFloat(c0[0].split(',')[1]) : 0;
+  const pasoY = Math.max(tol, 0.01) / 111320, pasoX = pasoY / Math.max(Math.cos(lat * Math.PI / 180), 0.01);
+  const r = c => typeof c[0] === 'number' ? Math.round(c[0] / pasoX) + ':' + Math.round(c[1] / pasoY) : '[' + c.map(r).join(';') + ']';
+  return g.type + (g.coordinates ? r(g.coordinates) : JSON.stringify(g.geometries));
+}
+function agrupar(indices, unir, tol) {
+  const puntos = [], otros = {};
+  indices.forEach(i => {
+    const g = FC.features[i].geometry; if (!g) return;
+    const p = puntoDe(g);
+    if (p) puntos.push(i);
+    else { const k = firma(g, tol); (otros[k] = otros[k] || []).push(i); }
+  });
+  Object.values(otros).forEach(l => l.slice(1).forEach(j => unir(l[0], j)));
+  if (!puntos.length) return;
+  if (tol <= 0) {
+    const exactos = {};
+    puntos.forEach(i => { const c = FC.features[i].geometry.coordinates, k = c[0] + ',' + c[1]; (exactos[k] = exactos[k] || []).push(i); });
+    Object.values(exactos).forEach(l => l.slice(1).forEach(j => unir(l[0], j)));
+    return;
+  }
+  const latMedia = puntos.reduce((s, i) => s + FC.features[i].geometry.coordinates[1], 0) / puntos.length;
+  const pasoY = tol / 111320, pasoX = pasoY / Math.max(Math.cos(latMedia * Math.PI / 180), 0.01);
+  const celdas = {};
+  puntos.forEach(i => {
+    const c = FC.features[i].geometry.coordinates, cx = Math.floor(c[0] / pasoX), cy = Math.floor(c[1] / pasoY);
+    for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) {
+      (celdas[(cx + dx) + ':' + (cy + dy)] || []).forEach(j => { if (Geo.distancia(c, FC.features[j].geometry.coordinates) <= tol) unir(j, i); });
+    }
+    (celdas[cx + ':' + cy] = celdas[cx + ':' + cy] || []).push(i);
+  });
+}
+function buscar() {
+  if (!FC) return;
+  const criterio = $('criterio').value, tol = Math.max(0, parseFloat($('tol').value) || 0);
+  const campo = $('campo').value, norm = $('norm').checked;
+  if (criterio !== 'pos' && !campo) { ultimo = { error: 'du.falta.campo' }; return pintarResultado(); }
+  const n = FC.features.length, padre = Array.from({ length: n }, (_, i) => i);
+  const raiz = i => { while (padre[i] !== i) { padre[i] = padre[padre[i]]; i = padre[i]; } return i; };
+  const unir = (a, b) => { const ra = raiz(a), rb = raiz(b); if (ra !== rb) { if (ra < rb) padre[rb] = ra; else padre[ra] = rb; } };
+  let sinGeom = 0;
+  if (criterio === 'pos') {
+    FC.features.forEach(f => { if (!f.geometry) sinGeom++; });
+    agrupar(FC.features.map((_, i) => i), unir, tol);
+  } else {
+    const porValor = {};
+    FC.features.forEach((f, i) => {
+      const v = normalizar((f.properties || {})[campo], norm);
+      if (v === '') return;
+      (porValor[v] = porValor[v] || []).push(i);
+    });
+    Object.values(porValor).forEach(l => {
+      if (l.length < 2) return;
+      if (criterio === 'attr') l.slice(1).forEach(j => unir(l[0], j));
+      else agrupar(l, unir, tol);
+    });
+  }
+  const miembros = {};
+  for (let i = 0; i < n; i++) { const r = raiz(i); (miembros[r] = miembros[r] || []).push(i); }
+  grupos = Object.values(miembros).filter(l => l.length > 1).sort((a, b) => b.length - a.length || a[0] - b[0]);
+  grupoDe = new Array(n).fill(0);
+  grupos.forEach((l, gi) => l.forEach(i => grupoDe[i] = gi + 1));
+  const repetidos = grupos.reduce((s, l) => s + l.length - 1, 0);
+  ultimo = { criterio, campo, repetidos, grupos: grupos.length, n, sinGeom: criterio === 'pos' ? sinGeom : 0 };
+  pintarResultado(); pintarMapa(); activarDescargas(true);
+}
+$('buscar').addEventListener('click', buscar);
+
+// ---------- Resultados ----------
+function etiquetaGrupo(l) {
+  const f = FC.features[l[0]], p = f.properties || {};
+  if (ultimo.criterio !== 'pos') return String(p[ultimo.campo]);
+  const nombre = p.name || p.Name || p.nombre || p.NOMBRE || p.id || p.ID;
+  if (nombre != null && nombre !== '') return String(nombre);
+  const c = f.geometry && f.geometry.type === 'Point' ? f.geometry.coordinates : null;
+  return c ? c[1].toFixed(6) + ', ' + c[0].toFixed(6) : f.geometry.type;
+}
+function pintarResultado() {
+  const el = $('resDup');
+  if (!ultimo) return;
+  if (ultimo.error) { el.innerHTML = '<span class="err">⚠ ' + Geo.esc(t(ultimo.error)) + '</span>'; $('grupos').innerHTML = ''; return; }
+  el.textContent = ultimo.grupos ? t('du.res', { rep: ultimo.repetidos, erep: t(ultimo.repetidos === 1 ? 'du.erep1' : 'du.erep'), g: ultimo.grupos, grp: t(ultimo.grupos === 1 ? 'du.grp1' : 'du.grp'), k: ultimo.n - ultimo.repetidos, n: ultimo.n }) : t('du.sin', { n: ultimo.n });
+  if (ultimo.sinGeom) el.textContent += '\n' + t('du.singeom', { n: ultimo.sinGeom });
+  const MAX = 50;
+  if (!grupos.length) { $('grupos').innerHTML = ''; return; }
+  let h = '<table><thead><tr><th scope="col">' + t('du.grupo') + '</th><th scope="col">' + t('du.elementos') + '</th><th scope="col">' +
+    (ultimo.criterio === 'pos' ? t('du.ref') : Geo.esc(ultimo.campo)) + '</th></tr></thead><tbody>';
+  grupos.slice(0, MAX).forEach((l, gi) => {
+    h += '<tr><td><button type="button" class="ir" data-g="' + gi + '">' + (gi + 1) + '</button></td><td>' + l.length + '</td><td>' + Geo.esc(etiquetaGrupo(l)) + '</td></tr>';
+  });
+  h += '</tbody></table>';
+  if (grupos.length > MAX) h += '<p class="ayuda">' + t('du.mas', { n: grupos.length - MAX }) + '</p>';
+  $('grupos').innerHTML = h;
+}
+$('grupos').addEventListener('click', e => {
+  const b = e.target.closest('button.ir'); if (!b) return;
+  const l = grupos[+b.dataset.g];
+  const capaG = L.geoJSON({ type: 'FeatureCollection', features: l.map(i => FC.features[i]).filter(f => f.geometry) });
+  try { map.fitBounds(capaG.getBounds(), { maxZoom: 19, padding: [40, 40] }); } catch (err) {}
+});
+function pintarMapa() {
+  if (capa) map.removeLayer(capa);
+  if (!FC) return;
+  const idx = new Map(FC.features.map((f, i) => [f, i]));
+  const rep = f => grupoDe && grupoDe[idx.get(f)];
+  capa = Geo.pintar(L, map, FC, { color: f => rep(f) ? ROJO : GRIS, radio: f => rep(f) ? 7 : 4 });
+}
+document.addEventListener('idioma', pintarResultado);
+
+// ---------- Descargas ----------
+function informe() {
+  return FC.features.map((f, i) => {
+    const g = grupoDe[i], primero = g ? grupos[g - 1][0] === i : false;
+    const fila = Object.assign({}, f.properties || {});
+    fila[t('du.col.grupo')] = g || '';
+    fila[t('du.col.n')] = g ? grupos[g - 1].length : 1;
+    fila[t('du.col.estado')] = !g ? t('du.est.unico') : primero ? t('du.est.original') : t('du.est.repetido');
+    if (f.geometry && f.geometry.type === 'Point') { fila.lon = f.geometry.coordinates[0]; fila.lat = f.geometry.coordinates[1]; }
+    fila.wkt = Geo.aWKT(f.geometry);
+    return fila;
+  });
+}
+$('bajarLimpio').addEventListener('click', () => {
+  const limpio = { type: 'FeatureCollection', features: FC.features.filter((f, i) => !grupoDe[i] || grupos[grupoDe[i] - 1][0] === i) };
+  const r = Geo.exportar(limpio, $('fmtLimpio').value, base + '_sin_duplicados');
+  if (r && r.catch) r.catch(e => Carga.info(() => t('fo.err.export', { msg: e.message }), true));
+});
+$('bajarInforme').addEventListener('click', () => {
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(informe()), t('du.hoja'));
+  XLSX.writeFile(wb, base + '_informe_duplicados.xlsx');
+});
+sincronizar();
+
+</script>
+</body>
+</html>
