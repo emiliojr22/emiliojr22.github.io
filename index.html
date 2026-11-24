@@ -1,57 +1,73 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-raiz="./">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Minitools GIS · Herramientas GIS gratuitas en el navegador</title>
-<meta name="description" content="Herramientas GIS gratuitas que funcionan en tu navegador: conversor de coordenadas UTM y conversor de formatos KML, GeoJSON, Shapefile, CSV y Excel. Sin instalar nada y sin subir tus datos.">
+<title data-i18n="po.titulo">Minitools GIS · Herramientas GIS gratuitas en el navegador</title>
+<meta name="description" content="Herramientas GIS gratuitas que funcionan en tu navegador: conversor de coordenadas UTM, conversor de formatos, buscador de duplicados y medición de distancias y superficies. Sin instalar nada y sin subir tus datos." data-i18n-attr="content:po.desc">
+<meta name="view-transition" content="same-origin">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="assets/estilo.css">
+<script src="assets/carrusel.js"></script>
 </head>
 <body>
 <header class="barra">
-  <a class="marca" href="./"><svg viewBox="0 0 26 26" aria-hidden="true"><path d="M13 3 23.5 22h-21Z" fill="none" stroke="#1E2B33" stroke-width="2"/><circle cx="13" cy="15.5" r="2.4" fill="#C4372C"/></svg>Minitools GIS</a>
-  <nav aria-label="Herramientas">
-    <a href="conversor-coordenadas/">Coordenadas</a>
-    <a href="conversor-formatos/">Formatos</a>
-  </nav>
+  <a class="marca" href="./" data-dir="atras"><svg viewBox="0 0 26 26" aria-hidden="true"><path d="M13 3 23.5 22h-21Z" fill="none" stroke="#1E2B33" stroke-width="2"/><circle cx="13" cy="15.5" r="2.4" fill="#C4372C"/></svg>Minitools GIS</a>
+  <div class="idioma" role="group" aria-label="Idioma / Language">
+    <button type="button" data-lang="es" lang="es" title="Español">ES</button>
+    <button type="button" data-lang="en" lang="en" title="English">EN</button>
+  </div>
 </header>
 
 <section class="relieve portada" data-relieve>
   <div class="dentro">
     <div class="cajetin">
       <h1>Minitools GIS</h1>
-      <p>Herramientas de cartografía para el trabajo diario. Funcionan en tu navegador: no hay que instalar nada y tus archivos no salen de tu equipo.</p>
+      <p data-i18n="po.lema">Herramientas de cartografía para el trabajo diario. Funcionan en tu navegador: no hay que instalar nada y tus archivos no salen de tu equipo.</p>
     </div>
-    <div class="lectura" data-lectura aria-live="off">Mueve el cursor sobre el relieve para ver sus coordenadas.</div>
+    <div class="lectura" data-lectura aria-live="off"><span data-i18n="po.lectura">Mueve el cursor sobre el relieve para ver sus coordenadas.</span></div>
   </div>
 </section>
 
 <section class="seccion" id="herramientas">
-  <h2>Herramientas</h2>
-  <p class="intro">Elige la que necesitas. Todas son gratuitas y no piden registro.</p>
+  <h2 data-i18n="po.herr">Herramientas</h2>
+  <p class="intro" data-i18n="po.herr.intro">Elige la que necesitas. Todas son gratuitas y no piden registro.</p>
   <ul class="leyenda">
     <li>
       <a href="conversor-coordenadas/">
         <svg viewBox="0 0 56 56" aria-hidden="true"><rect x="4" y="4" width="48" height="48" fill="#FBFCFA" stroke="#1E2B33"/><path d="M4 20h48M4 36h48M20 4v48M36 4v48" stroke="#1C6E9C" stroke-width="1"/><path d="M28 16v24M16 28h24" stroke="#C4372C" stroke-width="2"/><circle cx="28" cy="28" r="5" fill="none" stroke="#C4372C" stroke-width="2"/></svg>
-        <div><h3>Conversor de coordenadas</h3><p>Pasa de geográficas WGS84 o ETRS89 a UTM y al revés. Haz clic en el mapa para obtener las coordenadas de cualquier punto.</p></div>
-        <span class="abrir">Abrir</span>
+        <div><h3 data-i18n="h.coord">Conversor de coordenadas</h3><p data-i18n="po.coord">Pasa de geográficas WGS84 o ETRS89 a UTM y al revés. Haz clic en el mapa para obtener las coordenadas de cualquier punto.</p></div>
+        <span class="abrir" data-i18n="po.abrir">Abrir</span>
       </a>
     </li>
     <li>
       <a href="conversor-formatos/">
         <svg viewBox="0 0 56 56" aria-hidden="true"><path d="M8 38 28 48l20-10" fill="none" stroke="#A0612F" stroke-width="2"/><path d="M8 28 28 38l20-10" fill="none" stroke="#1C6E9C" stroke-width="2"/><path d="M8 18 28 8l20 10-20 10Z" fill="#FBFCFA" stroke="#1E2B33" stroke-width="2"/></svg>
-        <div><h3>Conversor de formatos</h3><p>Convierte entre KML, GeoJSON, GPX, Shapefile, CSV y Excel. Lee columnas WKT y coordenadas UTM, y te enseña el resultado en el mapa.</p></div>
-        <span class="abrir">Abrir</span>
+        <div><h3 data-i18n="h.formatos">Conversor de formatos</h3><p data-i18n="po.formatos">Convierte entre KML, GeoJSON, GPX, Shapefile, CSV y Excel. Lee columnas WKT y coordenadas UTM, y te enseña el resultado en el mapa.</p></div>
+        <span class="abrir" data-i18n="po.abrir">Abrir</span>
+      </a>
+    </li>
+    <li>
+      <a href="buscador-duplicados/">
+        <svg viewBox="0 0 56 56" aria-hidden="true"><circle cx="28" cy="28" r="18" fill="#FBFCFA" stroke="#1E2B33" stroke-width="1.5" stroke-dasharray="3 3"/><circle cx="24" cy="26" r="5" fill="#C4372C"/><circle cx="31" cy="31" r="5" fill="none" stroke="#C4372C" stroke-width="2"/><circle cx="12" cy="46" r="3" fill="#1C6E9C"/><circle cx="46" cy="12" r="3" fill="#1C6E9C"/></svg>
+        <div><h3 data-i18n="h.duplicados">Buscador de duplicados</h3><p data-i18n="po.duplicados">Encuentra puntos que están a menos de una distancia, geometrías iguales o valores repetidos en un campo, y descarga los datos sin repetidos.</p></div>
+        <span class="abrir" data-i18n="po.abrir">Abrir</span>
+      </a>
+    </li>
+    <li>
+      <a href="medir/">
+        <svg viewBox="0 0 56 56" aria-hidden="true"><path d="M8 44 22 20l14 14 12-22" fill="none" stroke="#C4372C" stroke-width="2"/><g fill="#FBFCFA" stroke="#1E2B33" stroke-width="1.5"><circle cx="8" cy="44" r="3.5"/><circle cx="22" cy="20" r="3.5"/><circle cx="36" cy="34" r="3.5"/><circle cx="48" cy="12" r="3.5"/></g><path d="M6 52h44" stroke="#A0612F" stroke-width="1.5"/><path d="M6 49v6M17 50v4M28 49v6M39 50v4M50 49v6" stroke="#A0612F" stroke-width="1.5"/></svg>
+        <div><h3 data-i18n="h.medir">Medir distancias y superficies</h3><p data-i18n="po.medir">Haz clic sobre el mapa para medir recorridos, perímetros y áreas en metros, kilómetros o hectáreas.</p></div>
+        <span class="abrir" data-i18n="po.abrir">Abrir</span>
       </a>
     </li>
     <li>
       <div class="pronto">
         <svg viewBox="0 0 56 56" aria-hidden="true"><path d="M6 14 30 6l20 16-6 26-30 2Z" fill="#FBFCFA" stroke="#1E2B33" stroke-width="2"/><path d="M30 6 26 30l18 18M26 30 6 14M26 30l-12 20" fill="none" stroke="#A0612F" stroke-width="1.5"/></svg>
-        <div><h3>Consulta catastral masiva</h3><p>Datos del Catastro a partir de una lista de referencias catastrales o de coordenadas.</p></div>
-        <span class="estado">En preparación</span>
+        <div><h3 data-i18n="po.catastro">Consulta catastral masiva</h3><p data-i18n="po.catastro.p">Datos del Catastro a partir de una lista de referencias catastrales o de coordenadas.</p></div>
+        <span class="estado" data-i18n="po.preparacion">En preparación</span>
       </div>
     </li>
   </ul>
@@ -59,16 +75,17 @@
 
 <section class="seccion">
   <div class="notas">
-    <div><h3>Tus datos se quedan contigo</h3><p>Los archivos se procesan en tu navegador. No se suben a ningún servidor, así que puedes usar información de clientes o de proyectos sin riesgo.</p></div>
-    <div><h3>Pensado para España</h3><p>ETRS89, UTM husos 28 a 31 y los formatos que se usan a diario en topografía, ingeniería y redes.</p></div>
-    <div><h3>Gratis y sin registro</h3><p>Abre la herramienta y úsala, sin crear ninguna cuenta ni dejar tu correo.</p></div>
+    <div><h3 data-i18n="po.n1">Tus datos se quedan contigo</h3><p data-i18n="po.n1.p">Los archivos se procesan en tu navegador. No se suben a ningún servidor, así que puedes usar información de clientes o de proyectos sin riesgo.</p></div>
+    <div><h3 data-i18n="po.n2">Pensado para España</h3><p data-i18n="po.n2.p">ETRS89, UTM husos 28 a 31 y los formatos que se usan a diario en topografía, ingeniería y redes.</p></div>
+    <div><h3 data-i18n="po.n3">Gratis y sin registro</h3><p data-i18n="po.n3.p">Abre la herramienta y úsala, sin crear ninguna cuenta ni dejar tu correo.</p></div>
   </div>
 </section>
 
 <footer class="pie">
   <span>Minitools GIS, 2026</span>
-  <span>Cartografía base de los mapas: © colaboradores de OpenStreetMap</span>
+  <span data-i18n="pie.osm">Cartografía base de los mapas: © colaboradores de OpenStreetMap</span>
 </footer>
+<script src="assets/i18n.js"></script>
 <script src="assets/curvas.js"></script>
 </body>
 </html>
