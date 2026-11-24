@@ -3,93 +3,86 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Conversor de formatos GIS online · KML, GeoJSON, Shapefile, CSV, Excel | Minitools GIS</title>
-<meta name="description" content="Convierte gratis entre KML, GeoJSON, GPX, Shapefile, CSV y Excel en tu navegador. Admite columnas WKT y coordenadas UTM. Tus datos no salen de tu ordenador.">
+<title>Conversor de formatos GIS online: KML, GeoJSON, Shapefile, CSV y Excel | Minitools GIS</title>
+<meta name="description" content="Convierte gratis entre KML, GeoJSON, GPX, Shapefile, CSV y Excel en tu navegador. Admite columnas WKT y coordenadas UTM. Tus archivos no salen de tu equipo.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-<style>
-  :root { --bg:#0f172a; --card:#1e293b; --acc:#22c55e; --txt:#e2e8f0; --mut:#94a3b8; --line:#334155; }
-  * { box-sizing:border-box; }
-  body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--txt); }
-  a { color:var(--acc); }
-  nav { padding:14px 20px; border-bottom:1px solid var(--line); }
-  nav a { text-decoration:none; font-weight:700; }
-  header { padding:22px 20px 6px; text-align:center; }
-  header h1 { margin:0; font-size:1.8rem; }
-  header p { color:var(--mut); margin:6px 0 0; }
-  main { max-width:1150px; margin:0 auto; padding:20px; display:grid; grid-template-columns:1fr 1.2fr; gap:20px; }
-  @media (max-width:850px){ main { grid-template-columns:1fr; } }
-  .card { background:var(--card); border-radius:14px; padding:20px; }
-  h2 { margin-top:0; font-size:1.1rem; }
-  .drop { border:2px dashed var(--line); border-radius:12px; padding:26px; text-align:center; cursor:pointer; transition:.2s; }
-  .drop.over, .drop:hover { border-color:var(--acc); background:#0b1220; }
-  .drop small { color:var(--mut); display:block; margin-top:6px; }
-  label { display:block; font-size:.85rem; color:var(--mut); margin:10px 0 4px; }
-  select, input { width:100%; padding:8px 10px; border-radius:8px; border:1px solid var(--line); background:#0b1220; color:var(--txt); font-size:.95rem; }
-  .row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-  .hidden { display:none; }
-  button { margin-top:14px; padding:10px 16px; border:0; border-radius:8px; background:var(--acc); color:#052e16; font-weight:700; cursor:pointer; }
-  button:disabled { opacity:.4; cursor:not-allowed; }
-  .fmts { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
-  .fmts button { margin:0; background:#0b1220; color:var(--txt); border:1px solid var(--line); }
-  .fmts button:not(:disabled):hover { border-color:var(--acc); color:var(--acc); }
-  .info { margin-top:14px; padding:12px; background:#0b1220; border-radius:8px; font-size:.9rem; white-space:pre-wrap; min-height:44px; }
-  .err { color:#f87171; }
-  #map { height:460px; border-radius:14px; }
-  footer { text-align:center; color:var(--mut); font-size:.8rem; padding:24px; }
-</style>
+<link rel="stylesheet" href="../assets/estilo.css">
 </head>
 <body>
-<nav><a href="../">← Minitools GIS</a></nav>
-<header>
-  <h1>Conversor de formatos GIS</h1>
-  <p>KML · GeoJSON · GPX · Shapefile · CSV · Excel — todo se procesa en tu navegador</p>
+<header class="barra">
+  <a class="marca" href="../"><svg viewBox="0 0 26 26" aria-hidden="true"><path d="M13 3 23.5 22h-21Z" fill="none" stroke="#1E2B33" stroke-width="2"/><circle cx="13" cy="15.5" r="2.4" fill="#C4372C"/></svg>Minitools GIS</a>
+  <nav aria-label="Herramientas">
+    <a href="../conversor-coordenadas/">Coordenadas</a>
+    <a href="../conversor-formatos/" aria-current="page">Formatos</a>
+  </nav>
 </header>
 
-<main>
-  <section class="card">
-    <h2>1. Carga tu archivo</h2>
-    <div class="drop" id="drop">
-      <strong>Arrastra aquí tu archivo</strong> o haz clic para elegirlo
-      <small>.geojson · .json · .kml · .gpx · .csv · .xlsx · .zip (Shapefile)</small>
+<section class="relieve franja" data-relieve>
+  <div class="dentro">
+    <div class="cajetin">
+      <h1>Conversor de formatos</h1>
+      <p>KML, GeoJSON, GPX, Shapefile, CSV y Excel, en cualquier dirección.</p>
     </div>
-    <input type="file" id="file" class="hidden" accept=".geojson,.json,.kml,.gpx,.csv,.txt,.xlsx,.xls,.zip">
+  </div>
+</section>
 
-    <div id="tabular" class="hidden">
-      <h2 style="margin-top:20px">Columnas de coordenadas</h2>
-      <label>Tipo de geometría</label>
-      <select id="mode"><option value="xy">Columnas X / Y</option><option value="wkt">Columna WKT</option></select>
-      <div id="xyBox" class="row">
-        <div><label>X / Longitud</label><select id="colX"></select></div>
-        <div><label>Y / Latitud</label><select id="colY"></select></div>
+<main class="trabajo">
+  <div>
+    <section class="panel">
+      <h2>1. Carga tu archivo</h2>
+      <p class="ayuda">El archivo se lee en tu navegador y no se sube a ningún sitio.</p>
+      <div class="soltar" id="drop" role="button" tabindex="0">
+        <strong>Arrastra aquí tu archivo</strong> o haz clic para elegirlo
+        <small>GeoJSON, KML, GPX, CSV, Excel o Shapefile comprimido en .zip</small>
       </div>
-      <div id="wktBox" class="hidden"><label>Columna WKT</label><select id="colWkt"></select></div>
-      <div class="row">
-        <div><label>Sistema de coordenadas</label><select id="crs"><option value="geo">Geográficas WGS84 / ETRS89</option><option value="utm">UTM (ETRS89 / WGS84)</option></select></div>
-        <div id="zoneBox" class="hidden"><label>Huso UTM (Norte)</label><input id="zone" type="number" min="1" max="60" value="30"></div>
+      <input type="file" id="file" class="oculto" accept=".geojson,.json,.kml,.gpx,.csv,.txt,.xlsx,.xls,.zip">
+      <div class="resultado" id="info" aria-live="polite">Todavía no has cargado ningún archivo.</div>
+    </section>
+
+    <section class="panel oculto" id="tabular">
+      <h2>2. Indica dónde están las coordenadas</h2>
+      <p class="ayuda">Hemos propuesto las columnas que parecen coordenadas. Cámbialas si no son correctas.</p>
+      <label for="mode">Las coordenadas están en</label>
+      <select id="mode"><option value="xy">Dos columnas, X e Y</option><option value="wkt">Una columna WKT</option></select>
+      <div id="xyBox" class="fila">
+        <div><label for="colX">Columna X o longitud</label><select id="colX"></select></div>
+        <div><label for="colY">Columna Y o latitud</label><select id="colY"></select></div>
       </div>
-      <button id="apply">Aplicar</button>
-    </div>
+      <div id="wktBox" class="oculto"><label for="colWkt">Columna WKT</label><select id="colWkt"></select></div>
+      <div class="fila">
+        <div><label for="crs">Sistema de coordenadas</label><select id="crs"><option value="geo">Geográficas WGS84 o ETRS89</option><option value="utm">UTM ETRS89 o WGS84</option></select></div>
+        <div id="zoneBox" class="oculto"><label for="zone">Huso UTM (norte)</label><input id="zone" type="number" min="1" max="60" value="30"></div>
+      </div>
+      <button class="boton" id="apply">Aplicar columnas</button>
+    </section>
 
-    <div class="info" id="info">Sin datos cargados.</div>
+    <section class="panel">
+      <h2>3. Descárgalo en otro formato</h2>
+      <p class="ayuda">La salida siempre va en WGS84 (EPSG:4326).</p>
+      <div class="fmts">
+        <button data-f="geojson" disabled>GeoJSON</button>
+        <button data-f="kml" disabled>KML</button>
+        <button data-f="shp" disabled>Shapefile (.zip)</button>
+        <button data-f="csv" disabled>CSV con WKT</button>
+        <button data-f="xlsx" disabled>Excel</button>
+      </div>
+    </section>
+  </div>
 
-    <h2 style="margin-top:20px">2. Descarga en otro formato</h2>
-    <div class="fmts">
-      <button data-f="geojson" disabled>GeoJSON</button>
-      <button data-f="kml" disabled>KML</button>
-      <button data-f="shp" disabled>Shapefile (.zip)</button>
-      <button data-f="csv" disabled>CSV (WKT)</button>
-      <button data-f="xlsx" disabled>Excel</button>
-    </div>
-  </section>
-
-  <section class="card">
-    <h2>Vista previa</h2>
-    <div id="map"></div>
+  <section class="mapa">
+    <div class="marco"><div id="map" role="region" aria-label="Vista previa del archivo"></div></div>
+    <p class="nota">Haz clic en un elemento del mapa para ver sus atributos.</p>
   </section>
 </main>
 
-<footer>Minitools GIS · Los archivos se procesan localmente y no se suben a ningún servidor · Salida en WGS84 (EPSG:4326)</footer>
-
+<footer class="pie">
+  <span>Minitools GIS, 2026</span>
+  <span>Los archivos se procesan en tu navegador y no se suben a ningún servidor.</span>
+</footer>
+<script src="../assets/curvas.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/shpjs@6.2.0/dist/shp.min.js"></script>
@@ -105,8 +98,8 @@ let layer = null;
 function preview(fc) {
   if (layer) map.removeLayer(layer);
   layer = L.geoJSON(fc, {
-    style: { color:'#22c55e', weight:3 },
-    pointToLayer: (f, ll) => L.circleMarker(ll, { radius:6, color:'#22c55e', fillOpacity:.7 }),
+    style: { color:'#C4372C', weight:3 },
+    pointToLayer: (f, ll) => L.circleMarker(ll, { radius:6, color:'#C4372C', fillOpacity:.7 }),
     onEachFeature: (f, l) => {
       const p = f.properties || {}, keys = Object.keys(p).slice(0, 12);
       if (keys.length) l.bindPopup(keys.map(k => '<b>' + esc(k) + '</b>: ' + esc(p[k])).join('<br>'));
@@ -133,8 +126,10 @@ function toFC(gj) {
 function summary(fc) {
   const types = {}, fields = new Set();
   fc.features.forEach(f => { const t = f.geometry ? f.geometry.type : 'Sin geometría'; types[t] = (types[t] || 0) + 1; Object.keys(f.properties || {}).forEach(k => fields.add(k)); });
-  return fc.features.length + ' elementos\n' + Object.entries(types).map(([t, n]) => '  · ' + t + ': ' + n).join('\n') +
-         '\nCampos: ' + ([...fields].join(', ') || '—');
+  const ES = { Point:'puntos', MultiPoint:'multipuntos', LineString:'líneas', MultiLineString:'multilíneas', Polygon:'polígonos', MultiPolygon:'multipolígonos', GeometryCollection:'geometrías mixtas', 'Sin geometría':'sin geometría' };
+  const SG = { Point:'punto', MultiPoint:'multipunto', LineString:'línea', MultiLineString:'multilínea', Polygon:'polígono', MultiPolygon:'multipolígono', GeometryCollection:'geometría mixta', 'Sin geometría':'sin geometría' };
+  return fc.features.length + ' elementos: ' + Object.entries(types).map(([t, n]) => n + ' ' + (n === 1 ? (SG[t] || t) : (ES[t] || t))).join(', ') +
+         '.\nCampos: ' + ([...fields].join(', ') || 'ninguno');
 }
 
 // ---------- UTM → geográficas ----------
@@ -265,7 +260,7 @@ function setupTable(data) {
   // Detección automática: valores > 180 => coordenadas UTM
   const r0 = rows[0], sample = wkt ? parseFloat((String(r0[wkt]).replace(/^SRID=\d+;/i, '').match(/-?\d+(\.\d+)?/) || [])[0]) : num(r0[$('colX').value]);
   $('crs').value = Math.abs(sample) > 180 ? 'utm' : 'geo'; syncMode();
-  $('tabular').classList.remove('hidden');
+  $('tabular').classList.remove('oculto');
   buildFromTable();
 }
 function num(v) { return typeof v === 'number' ? v : parseFloat(String(v).replace(',', '.')); }
@@ -288,8 +283,8 @@ function buildFromTable() {
 }
 function syncMode() {
   const wkt = $('mode').value === 'wkt';
-  $('xyBox').classList.toggle('hidden', wkt); $('wktBox').classList.toggle('hidden', !wkt);
-  $('zoneBox').classList.toggle('hidden', $('crs').value !== 'utm');
+  $('xyBox').classList.toggle('oculto', wkt); $('wktBox').classList.toggle('oculto', !wkt);
+  $('zoneBox').classList.toggle('oculto', $('crs').value !== 'utm');
 }
 $('mode').onchange = syncMode; $('crs').onchange = syncMode; $('apply').onclick = buildFromTable;
 
@@ -300,7 +295,7 @@ function loaded(fc, extra) {
 }
 async function handle(file) {
   if (!file) return;
-  baseName = file.name.replace(/\.[^.]+$/, ''); rows = null; $('tabular').classList.add('hidden');
+  baseName = file.name.replace(/\.[^.]+$/, ''); rows = null; $('tabular').classList.add('oculto');
   const ext = file.name.split('.').pop().toLowerCase();
   setInfo('Leyendo ' + file.name + '…');
   try {
@@ -319,6 +314,7 @@ async function handle(file) {
 }
 const drop = $('drop'), fileIn = $('file');
 drop.onclick = () => fileIn.click();
+drop.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileIn.click(); } };
 fileIn.onchange = () => handle(fileIn.files[0]);
 ['dragenter', 'dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
 ['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
