@@ -1,0 +1,150 @@
+/* Minitools GIS · hoja topográfica */
+:root {
+  --papel: #EDF0EA; --hoja: #FBFCFA; --tinta: #1E2B33; --tinta-2: #55636B;
+  --curva: #A0612F; --agua: #1C6E9C; --agua-osc: #14557A; --vertice: #C4372C;
+  --linea: rgba(30, 43, 51, .18);
+  --titulo: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --texto: "IBM Plex Sans", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--papel); color: var(--tinta); font: 400 1rem/1.55 var(--texto); }
+a { color: var(--agua); }
+a:hover { color: var(--agua-osc); }
+:focus-visible { outline: 3px solid var(--agua); outline-offset: 2px; }
+h1, h2, h3 { font-family: var(--titulo); font-weight: 600; line-height: 1.1; margin: 0; letter-spacing: .01em; }
+p { margin: 0; }
+
+/* Cabecera */
+.barra { display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  max-width: 1180px; margin: 0 auto; padding: 14px 24px; }
+.marca { display: inline-flex; align-items: center; gap: 10px; color: var(--tinta); text-decoration: none;
+  font: 600 1.4rem/1 var(--titulo); }
+.marca svg { width: 26px; height: 26px; }
+.barra nav { display: flex; gap: 22px; font-size: .95rem; }
+.barra nav a { color: var(--tinta-2); text-decoration: none; }
+.barra nav a:hover, .barra nav a[aria-current] { color: var(--tinta); text-decoration: underline; text-underline-offset: 4px; }
+
+/* Relieve: curvas de nivel + cuadrícula UTM */
+.relieve { position: relative; overflow: hidden; border-block: 1px solid var(--linea); background: var(--papel); }
+.relieve svg.curvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.curvas .c { fill: none; stroke: var(--curva); stroke-width: .8; opacity: .55; }
+.curvas .m { fill: none; stroke: var(--curva); stroke-width: 1.6; opacity: .8; }
+.curvas .g { stroke: var(--agua); stroke-width: .7; opacity: .32; }
+.curvas text { font: 500 11px var(--texto); fill: var(--agua); font-variant-numeric: tabular-nums; }
+@media (prefers-reduced-motion: no-preference) {
+  .relieve svg.curvas { animation: revelar 1.6s cubic-bezier(.2, .7, .2, 1) both; }
+  @keyframes revelar { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+}
+.relieve .dentro { position: relative; max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+
+/* Cajetín (bloque de título de la hoja) */
+.cajetin { display: inline-block; background: var(--hoja); border: 1px solid var(--tinta);
+  outline: 1px solid var(--tinta); outline-offset: 4px; padding: 22px 26px; max-width: 34rem; }
+.cajetin p { color: var(--tinta-2); margin-top: 10px; }
+
+.portada { min-height: 470px; display: flex; align-items: flex-end; }
+.portada .dentro { width: 100%; padding-bottom: 44px; display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; }
+.portada h1 { font-size: clamp(3rem, 8vw, 4.77rem); font-weight: 600; letter-spacing: -.005em; }
+.portada .cajetin p { font-size: 1.12rem; }
+
+.lectura { background: var(--hoja); border: 1px solid var(--linea); padding: 10px 14px; font-size: .82rem;
+  color: var(--tinta-2); font-variant-numeric: tabular-nums; min-width: 15.5rem; }
+.lectura b { color: var(--tinta); font-weight: 500; }
+
+.franja { min-height: 190px; display: flex; align-items: flex-end; }
+.franja .dentro { width: 100%; padding: 34px 24px 28px; }
+.franja h1 { font-size: clamp(2.1rem, 5vw, 3.05rem); }
+
+/* Secciones */
+.seccion { max-width: 1180px; margin: 0 auto; padding: 56px 24px 8px; }
+.seccion > h2 { font-size: 1.95rem; margin-bottom: 6px; }
+.seccion > .intro { color: var(--tinta-2); max-width: 40rem; margin-bottom: 26px; }
+
+/* Leyenda de herramientas */
+.leyenda { list-style: none; margin: 0; padding: 0; border-top: 2px solid var(--tinta); }
+.leyenda li { border-bottom: 1px solid var(--linea); }
+.leyenda a, .leyenda .pronto { display: grid; grid-template-columns: 64px 1fr auto; gap: 22px; align-items: center;
+  padding: 22px 8px; color: var(--tinta); text-decoration: none; }
+.leyenda a:hover { background: var(--hoja); }
+.leyenda a:hover .abrir { background: var(--agua-osc); }
+.leyenda svg { width: 56px; height: 56px; }
+.leyenda h3 { font-size: 1.56rem; }
+.leyenda p { color: var(--tinta-2); margin-top: 4px; max-width: 46rem; }
+.abrir { background: var(--agua); color: #fff; padding: 9px 18px; border-radius: 3px; font-weight: 500; font-size: .95rem; white-space: nowrap; }
+.pronto { opacity: .6; }
+.pronto .estado { color: var(--tinta-2); font-size: .9rem; }
+
+/* Notas al margen */
+.notas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+.notas div { border-top: 3px solid var(--curva); padding-top: 14px; }
+.notas h3 { font-size: 1.25rem; margin-bottom: 6px; }
+.notas p { color: var(--tinta-2); font-size: .95rem; }
+
+/* Herramientas */
+.trabajo { max-width: 1180px; margin: 0 auto; padding: 32px 24px 8px; display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 32px; align-items: start; }
+.panel { background: var(--hoja); border: 1px solid var(--linea); border-top: 2px solid var(--tinta); padding: 22px 24px 26px; }
+.panel + .panel { margin-top: 24px; }
+.panel h2 { font-size: 1.45rem; margin-bottom: 4px; }
+.panel .ayuda { color: var(--tinta-2); font-size: .92rem; }
+label { display: block; font-size: .88rem; font-weight: 500; margin: 14px 0 5px; }
+input, select { width: 100%; padding: 9px 11px; font: inherit; font-size: .97rem; color: var(--tinta);
+  background: #fff; border: 1px solid #A9B3B8; border-radius: 3px; }
+input:focus, select:focus { border-color: var(--agua); }
+.fila { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.oculto { display: none !important; }
+button { font: inherit; cursor: pointer; }
+.boton { margin-top: 18px; padding: 10px 20px; background: var(--agua); color: #fff; border: 0; border-radius: 3px; font-weight: 500; }
+.boton:hover { background: var(--agua-osc); }
+.resultado { margin-top: 16px; padding: 12px 14px; background: var(--papel); border-left: 3px solid var(--curva);
+  min-height: 3rem; white-space: pre-wrap; font-variant-numeric: tabular-nums; font-size: .97rem; }
+.err { color: var(--vertice); }
+
+/* Mapa con marco graduado (neatline) */
+.marco { position: relative; padding: 7px; border: 1px solid var(--tinta); background:
+  repeating-linear-gradient(90deg, var(--tinta) 0 1px, transparent 1px 48px) top / 100% 6px no-repeat,
+  repeating-linear-gradient(90deg, var(--tinta) 0 1px, transparent 1px 48px) bottom / 100% 6px no-repeat,
+  repeating-linear-gradient(0deg, var(--tinta) 0 1px, transparent 1px 48px) left / 6px 100% no-repeat,
+  repeating-linear-gradient(0deg, var(--tinta) 0 1px, transparent 1px 48px) right / 6px 100% no-repeat,
+  var(--hoja); }
+.marco #map { height: 500px; border: 1px solid var(--tinta); }
+.mapa { position: sticky; top: 16px; }
+.nota { color: var(--tinta-2); font-size: .9rem; margin-top: 10px; }
+
+/* Conversor de formatos */
+.soltar { margin-top: 12px; border: 1.5px dashed #8E9AA0; border-radius: 3px; padding: 28px 18px; text-align: center;
+  background: #fff; cursor: pointer; }
+.soltar:hover, .soltar.over { border-color: var(--agua); background: #F3F8FB; }
+.soltar strong { font-weight: 600; }
+.soltar small { display: block; color: var(--tinta-2); margin-top: 6px; font-size: .85rem; }
+.fmts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.fmts button { padding: 9px 16px; background: #fff; color: var(--tinta); border: 1px solid var(--tinta); border-radius: 3px; font-weight: 500; }
+.fmts button:not(:disabled):hover { background: var(--agua); border-color: var(--agua); color: #fff; }
+.fmts button:disabled { opacity: .35; cursor: not-allowed; }
+
+/* Pie */
+.pie { width: calc(100% - 48px); max-width: 1132px; margin: 64px auto 0; padding: 22px 0 40px; border-top: 1px solid var(--linea);
+  color: var(--tinta-2); font-size: .85rem; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+/* Leaflet en la paleta */
+.leaflet-container { font-family: var(--texto); }
+.leaflet-bar a { color: var(--tinta); }
+
+@media (max-width: 860px) {
+  .trabajo { grid-template-columns: 1fr; }
+  .notas { grid-template-columns: 1fr; gap: 22px; }
+  .portada { min-height: 420px; }
+  .portada .dentro { flex-direction: column; align-items: flex-start; }
+  .lectura { display: none; }
+  .leyenda a, .leyenda .pronto { grid-template-columns: 44px 1fr; gap: 14px; }
+  .leyenda svg { width: 42px; height: 42px; }
+  .abrir, .pronto .estado { grid-column: 2; justify-self: start; }
+  .marco #map { height: 380px; }
+  .mapa { position: static; }
+  .barra nav { display: none; }
+}
+@media (max-width: 480px) {
+  .fila { grid-template-columns: 1fr; }
+  .cajetin { padding: 18px 18px; }
+}
