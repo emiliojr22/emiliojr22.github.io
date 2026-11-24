@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es" data-raiz="../" data-herramienta="medir">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-i18n="me.titulo">Medir distancias y superficies en el mapa online | Minitools GIS</title>
+<meta name="description" content="Mide distancias y superficies haciendo clic sobre el mapa. Resultados en metros, kilómetros, hectáreas y kilómetros cuadrados, y descarga en GeoJSON o KML." data-i18n-attr="content:me.desc">
+<meta name="view-transition" content="same-origin">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="../assets/estilo.css">
+<script src="../assets/carrusel.js"></script>
+</head>
+<body>
+<header class="barra">
+  <a class="marca" href="../" data-dir="atras"><svg viewBox="0 0 26 26" aria-hidden="true"><path d="M13 3 23.5 22h-21Z" fill="none" stroke="#1E2B33" stroke-width="2"/><circle cx="13" cy="15.5" r="2.4" fill="#C4372C"/></svg>Minitools GIS</a>
+  <div class="idioma" role="group" aria-label="Idioma / Language">
+    <button type="button" data-lang="es" lang="es" title="Español">ES</button>
+    <button type="button" data-lang="en" lang="en" title="English">EN</button>
+  </div>
+</header>
+
+<section class="relieve franja" data-relieve>
+  <div class="dentro">
+    <div class="cajetin">
+      <h1 data-i18n="h.medir">Medir distancias y superficies</h1>
+      <p data-i18n="me.sub">Haz clic sobre el mapa para medir longitudes, perímetros y áreas.</p>
+    </div>
+  </div>
+</section>
+
+<nav class="carrusel"></nav>
+<main class="trabajo medir">
+  <div>
+    <section class="panel">
+      <h2 data-i18n="me.que">¿Qué quieres medir?</h2>
+      <div class="conmutador" role="group" aria-label="Tipo de medida" data-i18n-attr="aria-label:me.tipo">
+        <button type="button" id="modoDist" aria-pressed="true" data-i18n="me.dist">Distancia</button>
+        <button type="button" id="modoSup" aria-pressed="false" data-i18n="me.sup.b">Superficie</button>
+      </div>
+      <p class="ayuda" id="instr"></p>
+      <div class="resultado medida" id="medida" aria-live="polite"></div>
+      <ol class="tramos" id="tramos"></ol>
+      <div class="fmts">
+        <button type="button" id="deshacer" disabled data-i18n="me.deshacer">Deshacer último punto</button>
+        <button type="button" id="borrar" disabled data-i18n="me.borrar">Empezar de nuevo</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2 data-i18n="me.bajar.tit">Descarga la medición</h2>
+      <p class="ayuda" data-i18n="me.bajar.ayuda">La geometría se guarda con su longitud o su superficie como atributo.</p>
+      <div class="fmts">
+        <button type="button" data-f="geojson" disabled>GeoJSON</button>
+        <button type="button" data-f="kml" disabled>KML</button>
+      </div>
+    </section>
+  </div>
+
+  <section class="mapa">
+    <div class="marco"><div id="map" role="region" aria-label="Mapa de medición" data-i18n-attr="aria-label:me.mapa"></div></div>
+    <p class="nota" data-i18n="me.nota">Busca la zona con el zoom y ve haciendo clic en cada vértice. La medida se actualiza al mover el ratón.</p>
+  </section>
+</main>
+
+<footer class="pie">
+  <span>Minitools GIS, 2026</span>
+  <span data-i18n="me.pie">Medidas geodésicas sobre la esfera terrestre. El error es inferior al 0,5 %.</span>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="../assets/i18n.js"></script>
+<script src="../assets/geo.js"></script>
+
+<script src="../assets/curvas.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const map = L.map('map', { doubleClickZoom: false }).setView([40.4168, -3.7038], 13);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(map);
+const ROJO = '#C4372C';
+let modo = 'dist', puntos = [], cursor = null;
+const traza = L.polyline([], { color: ROJO, weight: 3 }).addTo(map);
+const goma = L.polyline([], { color: ROJO, weight: 2, dashArray: '6 6', opacity: .8 }).addTo(map);
+const zona = L.polygon([], { color: ROJO, weight: 3, fillColor: ROJO, fillOpacity: .12 });
+const vertices = L.layerGroup().addTo(map);
+
+const fmtN = (n, d) => n.toLocaleString(idioma() === 'en' ? 'en-GB' : 'es-ES', { minimumFractionDigits: d, maximumFractionDigits: d });
+const fmtLong = m => m < 1000 ? fmtN(m, 1) + ' m' : fmtN(m / 1000, 3) + ' km';
+const fmtArea = m2 => m2 < 10000 ? fmtN(m2, 1) + ' m²' : m2 < 1e6 ? fmtN(m2 / 10000, 4) + ' ha  (' + fmtN(m2, 0) + ' m²)' : fmtN(m2 / 1e6, 4) + ' km²  (' + fmtN(m2 / 10000, 2) + ' ha)';
+const coords = pts => pts.map(p => [p.lng, p.lat]);
+
+function pintar() {
+  const pts = puntos.concat(cursor && puntos.length ? [cursor] : []);
+  vertices.clearLayers();
+  puntos.forEach(p => L.circleMarker(p, { radius: 4, color: '#1E2B33', weight: 1.5, fillColor: '#FBFCFA', fillOpacity: 1 }).addTo(vertices));
+  if (modo === 'dist') {
+    traza.setLatLngs(puntos); zona.remove();
+    goma.setLatLngs(cursor && puntos.length ? [puntos[puntos.length - 1], cursor] : []);
+  } else {
+    traza.setLatLngs([]);
+    if (pts.length >= 3) { zona.setLatLngs(pts); zona.addTo(map); } else zona.remove();
+    goma.setLatLngs(pts.length === 2 ? pts : []);
+  }
+  $('instr').textContent = t(modo === 'dist' ? 'me.instr.dist' : 'me.instr.sup');
+  let txt = '', tramos = '';
+  if (modo === 'dist') {
+    if (pts.length < 2) txt = t('me.vacio');
+    else {
+      txt = t('me.total') + ': ' + fmtLong(Geo.longitud(coords(pts)));
+      for (let i = 1; i < puntos.length; i++) tramos += '<li>' + t('me.tramo', { i }) + ': ' + fmtLong(Geo.distancia(coords([puntos[i - 1]])[0], coords([puntos[i]])[0])) + '</li>';
+    }
+  } else {
+    if (pts.length < 3) txt = t('me.vacio.sup');
+    else {
+      const anillo = coords(pts);
+      txt = t('me.sup') + ': ' + fmtArea(Geo.areaAnillo(anillo)) + '\n' + t('me.perim') + ': ' + fmtLong(Geo.longitud(anillo.concat([anillo[0]])));
+    }
+  }
+  $('medida').textContent = txt;
+  $('tramos').innerHTML = tramos;
+  $('deshacer').disabled = !puntos.length; $('borrar').disabled = !puntos.length;
+  const listo = modo === 'dist' ? puntos.length >= 2 : puntos.length >= 3;
+  document.querySelectorAll('[data-f]').forEach(b => b.disabled = !listo);
+}
+map.on('click', e => { puntos.push(e.latlng); pintar(); });
+map.on('mousemove', e => { cursor = e.latlng; if (puntos.length) pintar(); });
+map.getContainer().addEventListener('mouseleave', () => { cursor = null; pintar(); });
+
+function cambiarModo(m) {
+  modo = m;
+  $('modoDist').setAttribute('aria-pressed', m === 'dist'); $('modoSup').setAttribute('aria-pressed', m === 'sup');
+  pintar();
+}
+$('modoDist').addEventListener('click', () => cambiarModo('dist'));
+$('modoSup').addEventListener('click', () => cambiarModo('sup'));
+$('deshacer').addEventListener('click', () => { puntos.pop(); pintar(); });
+$('borrar').addEventListener('click', () => { puntos = []; pintar(); });
+document.addEventListener('keydown', e => {
+  if (e.target.closest('input, select, textarea')) return;
+  if ((e.key === 'z' && (e.ctrlKey || e.metaKey)) || e.key === 'Backspace') { if (puntos.length) { e.preventDefault(); puntos.pop(); pintar(); } }
+  if (e.key === 'Escape') { puntos = []; pintar(); }
+});
+document.querySelectorAll('[data-f]').forEach(b => b.addEventListener('click', () => {
+  const c = coords(puntos);
+  let f;
+  if (modo === 'dist') f = { type: 'Feature', properties: { longitud_m: Math.round(Geo.longitud(c) * 100) / 100 }, geometry: { type: 'LineString', coordinates: c } };
+  else {
+    const anillo = c.concat([c[0]]);
+    f = { type: 'Feature', properties: { area_m2: Math.round(Geo.areaAnillo(c) * 100) / 100, perimetro_m: Math.round(Geo.longitud(anillo) * 100) / 100 }, geometry: { type: 'Polygon', coordinates: [anillo] } };
+  }
+  Geo.exportar({ type: 'FeatureCollection', features: [f] }, b.dataset.f, modo === 'dist' ? 'medicion_distancia' : 'medicion_superficie');
+}));
+document.addEventListener('idioma', pintar);
+pintar();
+
+</script>
+</body>
+</html>
