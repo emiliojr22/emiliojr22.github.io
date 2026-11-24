@@ -87,14 +87,15 @@
     return [lat / R, lon / R];
   }
   function miles(n) { return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' '); }
-  function grados(v, pos, neg) { return Math.abs(v).toFixed(4).replace('.', ',') + 'º ' + (v >= 0 ? pos : neg); }
+  function grados(v, pos, neg) { var n = Math.abs(v).toFixed(4); if (!window.idioma || window.idioma() === 'es') n = n.replace('.', ','); return n + 'º ' + (v >= 0 ? pos : neg); }
 
   function lectura(caja, salida) {
     caja.addEventListener('pointermove', function (ev) {
       var r = caja.getBoundingClientRect(), X = X0 + (ev.clientX - r.left) * M_PX, Y = Y0 - (ev.clientY - r.top) * M_PX;
       var g = utm2geo(X, Y, 30);
-      salida.innerHTML = 'Huso 30N &nbsp; X <b>' + miles(X) + '</b> m &nbsp; Y <b>' + miles(Y) + '</b> m<br>' +
-        'Lat <b>' + grados(g[0], 'N', 'S') + '</b> &nbsp; Lon <b>' + grados(g[1], 'E', 'O') + '</b>';
+      var t = window.t || function (k) { return { 'lec.huso': 'Huso', 'lec.lat': 'Lat', 'lec.lon': 'Lon', 'lec.e': 'E', 'lec.o': 'O' }[k]; };
+      salida.innerHTML = t('lec.huso') + ' 30N &nbsp; X <b>' + miles(X) + '</b> m &nbsp; Y <b>' + miles(Y) + '</b> m<br>' +
+        t('lec.lat') + ' <b>' + grados(g[0], 'N', 'S') + '</b> &nbsp; ' + t('lec.lon') + ' <b>' + grados(g[1], t('lec.e'), t('lec.o')) + '</b>';
     });
   }
 
