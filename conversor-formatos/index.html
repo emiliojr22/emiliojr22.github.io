@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Conversor de formatos GIS online · KML, GeoJSON, Shapefile, CSV, Excel | Minitools GIS</title>
+<meta name="description" content="Convierte gratis entre KML, GeoJSON, GPX, Shapefile, CSV y Excel en tu navegador. Admite columnas WKT y coordenadas UTM. Tus datos no salen de tu ordenador.">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+  :root { --bg:#0f172a; --card:#1e293b; --acc:#22c55e; --txt:#e2e8f0; --mut:#94a3b8; --line:#334155; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--txt); }
+  a { color:var(--acc); }
+  nav { padding:14px 20px; border-bottom:1px solid var(--line); }
+  nav a { text-decoration:none; font-weight:700; }
+  header { padding:22px 20px 6px; text-align:center; }
+  header h1 { margin:0; font-size:1.8rem; }
+  header p { color:var(--mut); margin:6px 0 0; }
+  main { max-width:1150px; margin:0 auto; padding:20px; display:grid; grid-template-columns:1fr 1.2fr; gap:20px; }
+  @media (max-width:850px){ main { grid-template-columns:1fr; } }
+  .card { background:var(--card); border-radius:14px; padding:20px; }
+  h2 { margin-top:0; font-size:1.1rem; }
+  .drop { border:2px dashed var(--line); border-radius:12px; padding:26px; text-align:center; cursor:pointer; transition:.2s; }
+  .drop.over, .drop:hover { border-color:var(--acc); background:#0b1220; }
+  .drop small { color:var(--mut); display:block; margin-top:6px; }
+  label { display:block; font-size:.85rem; color:var(--mut); margin:10px 0 4px; }
+  select, input { width:100%; padding:8px 10px; border-radius:8px; border:1px solid var(--line); background:#0b1220; color:var(--txt); font-size:.95rem; }
+  .row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .hidden { display:none; }
+  button { margin-top:14px; padding:10px 16px; border:0; border-radius:8px; background:var(--acc); color:#052e16; font-weight:700; cursor:pointer; }
+  button:disabled { opacity:.4; cursor:not-allowed; }
+  .fmts { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+  .fmts button { margin:0; background:#0b1220; color:var(--txt); border:1px solid var(--line); }
+  .fmts button:not(:disabled):hover { border-color:var(--acc); color:var(--acc); }
+  .info { margin-top:14px; padding:12px; background:#0b1220; border-radius:8px; font-size:.9rem; white-space:pre-wrap; min-height:44px; }
+  .err { color:#f87171; }
+  #map { height:460px; border-radius:14px; }
+  footer { text-align:center; color:var(--mut); font-size:.8rem; padding:24px; }
+</style>
+</head>
+<body>
+<nav><a href="../">← Minitools GIS</a></nav>
+<header>
+  <h1>Conversor de formatos GIS</h1>
+  <p>KML · GeoJSON · GPX · Shapefile · CSV · Excel — todo se procesa en tu navegador</p>
+</header>
+
+<main>
+  <section class="card">
+    <h2>1. Carga tu archivo</h2>
+    <div class="drop" id="drop">
+      <strong>Arrastra aquí tu archivo</strong> o haz clic para elegirlo
+      <small>.geojson · .json · .kml · .gpx · .csv · .xlsx · .zip (Shapefile)</small>
+    </div>
+    <input type="file" id="file" class="hidden" accept=".geojson,.json,.kml,.gpx,.csv,.txt,.xlsx,.xls,.zip">
+
+    <div id="tabular" class="hidden">
+      <h2 style="margin-top:20px">Columnas de coordenadas</h2>
+      <label>Tipo de geometría</label>
+      <select id="mode"><option value="xy">Columnas X / Y</option><option value="wkt">Columna WKT</option></select>
+      <div id="xyBox" class="row">
+        <div><label>X / Longitud</label><select id="colX"></select></div>
+        <div><label>Y / Latitud</label><select id="colY"></select></div>
+      </div>
+      <div id="wktBox" class="hidden"><label>Columna WKT</label><select id="colWkt"></select></div>
+      <div class="row">
+        <div><label>Sistema de coordenadas</label><select id="crs"><option value="geo">Geográficas WGS84 / ETRS89</option><option value="utm">UTM (ETRS89 / WGS84)</option></select></div>
+        <div id="zoneBox" class="hidden"><label>Huso UTM (Norte)</label><input id="zone" type="number" min="1" max="60" value="30"></div>
+      </div>
+      <button id="apply">Aplicar</button>
+    </div>
+
+    <div class="info" id="info">Sin datos cargados.</div>
+
+    <h2 style="margin-top:20px">2. Descarga en otro formato</h2>
+    <div class="fmts">
+      <button data-f="geojson" disabled>GeoJSON</button>
+      <button data-f="kml" disabled>KML</button>
+      <button data-f="shp" disabled>Shapefile (.zip)</button>
+      <button data-f="csv" disabled>CSV (WKT)</button>
+      <button data-f="xlsx" disabled>Excel</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Vista previa</h2>
+    <div id="map"></div>
+  </section>
+</main>
+
+<footer>Minitools GIS · Los archivos se procesan localmente y no se suben a ningún servidor · Salida en WGS84 (EPSG:4326)</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/shpjs@6.2.0/dist/shp.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mapbox/shp-write@0.4.3/shpwrite.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+let FC = null, baseName = 'datos', rows = null;
+
+// ---------- Mapa ----------
+const map = L.map('map').setView([40.4, -3.7], 5);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, attribution:'© OpenStreetMap' }).addTo(map);
+let layer = null;
+function preview(fc) {
+  if (layer) map.removeLayer(layer);
+  layer = L.geoJSON(fc, {
+    style: { color:'#22c55e', weight:3 },
+    pointToLayer: (f, ll) => L.circleMarker(ll, { radius:6, color:'#22c55e', fillOpacity:.7 }),
+    onEachFeature: (f, l) => {
+      const p = f.properties || {}, keys = Object.keys(p).slice(0, 12);
+      if (keys.length) l.bindPopup(keys.map(k => '<b>' + esc(k) + '</b>: ' + esc(p[k])).join('<br>'));
+    }
+  }).addTo(map);
+  try { map.fitBounds(layer.getBounds(), { maxZoom:16, padding:[20,20] }); } catch (e) {}
+}
+
+// ---------- Utilidades ----------
+function esc(v) { return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c])); }
+function setInfo(msg, isErr) { $('info').innerHTML = isErr ? '<span class="err">⚠ ' + esc(msg) + '</span>' : esc(msg); }
+function enable(on) { document.querySelectorAll('.fmts button').forEach(b => b.disabled = !on); }
+function download(data, name, type) {
+  const blob = data instanceof Blob ? data : new Blob([data], { type });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+function toFC(gj) {
+  if (Array.isArray(gj)) return { type:'FeatureCollection', features: gj.flatMap(g => toFC(g).features) };
+  if (gj.type === 'FeatureCollection') return gj;
+  if (gj.type === 'Feature') return { type:'FeatureCollection', features:[gj] };
+  return { type:'FeatureCollection', features:[{ type:'Feature', properties:{}, geometry:gj }] };
+}
+function summary(fc) {
+  const types = {}, fields = new Set();
+  fc.features.forEach(f => { const t = f.geometry ? f.geometry.type : 'Sin geometría'; types[t] = (types[t] || 0) + 1; Object.keys(f.properties || {}).forEach(k => fields.add(k)); });
+  return fc.features.length + ' elementos\n' + Object.entries(types).map(([t, n]) => '  · ' + t + ': ' + n).join('\n') +
+         '\nCampos: ' + ([...fields].join(', ') || '—');
+}
+
+// ---------- UTM → geográficas ----------
+const A = 6378137, F = 1/298.257223563, K0 = 0.9996, E2 = F*(2-F), EP2 = E2/(1-E2), R = Math.PI/180;
+function utm2geo(x, y, zone) {
+  x -= 500000;
+  const lon0 = ((zone-1)*6 - 177) * R, mu = (y/K0)/(A*(1 - E2/4 - 3*E2**2/64 - 5*E2**3/256));
+  const e1 = (1 - Math.sqrt(1-E2))/(1 + Math.sqrt(1-E2));
+  const p = mu + (3*e1/2 - 27*e1**3/32)*Math.sin(2*mu) + (21*e1**2/16 - 55*e1**4/32)*Math.sin(4*mu) + (151*e1**3/96)*Math.sin(6*mu) + (1097*e1**4/512)*Math.sin(8*mu);
+  const N = A/Math.sqrt(1 - E2*Math.sin(p)**2), T = Math.tan(p)**2, C = EP2*Math.cos(p)**2;
+  const Rr = A*(1-E2)/Math.pow(1 - E2*Math.sin(p)**2, 1.5), D = x/(N*K0);
+  const lat = p - (N*Math.tan(p)/Rr)*(D**2/2 - (5+3*T+10*C-4*C**2-9*EP2)*D**4/24 + (61+90*T+298*C+45*T**2-252*EP2-3*C**2)*D**6/720);
+  const lon = lon0 + (D - (1+2*T+C)*D**3/6 + (5-2*C+28*T-3*C**2+8*EP2+24*T**2)*D**5/120)/Math.cos(p);
+  return [lon/R, lat/R];
+}
+function mapCoords(g, fn) {
+  const m = c => typeof c[0] === 'number' ? fn(c) : c.map(m);
+  return g && g.coordinates ? { type:g.type, coordinates:m(g.coordinates) } : g;
+}
+
+// ---------- WKT ----------
+function parseWKT(s) {
+  s = String(s).trim().replace(/^SRID=\d+;/i, '');
+  const m = s.match(/^(MULTI)?(POINT|LINESTRING|POLYGON)\s*(Z|M|ZM)?\s*(\(.*\))$/i);
+  if (!m) return null;
+  const type = ((m[1] ? 'Multi' : '') + ({POINT:'Point', LINESTRING:'LineString', POLYGON:'Polygon'})[m[2].toUpperCase()]);
+  const json = m[4].replace(/(-?[\d.eE+-]+)\s+(-?[\d.eE+-]+)(\s+-?[\d.eE+-]+)*/g, '[$1,$2]').replace(/\(/g, '[').replace(/\)/g, ']');
+  let c = JSON.parse(json);
+  if (type === 'Point') c = c[0];
+  if (type === 'LineString') c = c;
+  if (type === 'MultiPoint') c = c.map(p => typeof p[0] === 'number' ? p : p[0]);
+  return { type, coordinates:c };
+}
+function toWKT(g) {
+  if (!g) return '';
+  const pt = c => c[0] + ' ' + c[1], ring = r => '(' + r.map(pt).join(', ') + ')', poly = p => '(' + p.map(ring).join(', ') + ')';
+  switch (g.type) {
+    case 'Point': return 'POINT (' + pt(g.coordinates) + ')';
+    case 'LineString': return 'LINESTRING ' + ring(g.coordinates);
+    case 'Polygon': return 'POLYGON ' + poly(g.coordinates);
+    case 'MultiPoint': return 'MULTIPOINT (' + g.coordinates.map(c => '(' + pt(c) + ')').join(', ') + ')';
+    case 'MultiLineString': return 'MULTILINESTRING (' + g.coordinates.map(ring).join(', ') + ')';
+    case 'MultiPolygon': return 'MULTIPOLYGON (' + g.coordinates.map(poly).join(', ') + ')';
+    case 'GeometryCollection': return 'GEOMETRYCOLLECTION (' + g.geometries.map(toWKT).join(', ') + ')';
+  }
+  return '';
+}
+
+// ---------- KML / GPX ----------
+function kids(el, name) { return [...el.getElementsByTagName(name)]; }
+function kmlCoords(el) { return el.textContent.trim().split(/\s+/).map(t => t.split(',').slice(0, 2).map(Number)); }
+function kmlGeom(el) {
+  const n = el.localName;
+  if (n === 'Point') return { type:'Point', coordinates: kmlCoords(kids(el, 'coordinates')[0])[0] };
+  if (n === 'LineString') return { type:'LineString', coordinates: kmlCoords(kids(el, 'coordinates')[0]) };
+  if (n === 'Polygon') {
+    const outer = kids(el, 'outerBoundaryIs').map(b => kmlCoords(kids(b, 'coordinates')[0]));
+    const inner = kids(el, 'innerBoundaryIs').map(b => kmlCoords(kids(b, 'coordinates')[0]));
+    return { type:'Polygon', coordinates: outer.concat(inner) };
+  }
+  if (n === 'MultiGeometry') {
+    const parts = [...el.children].map(kmlGeom).filter(Boolean);
+    const t = new Set(parts.map(p => p.type));
+    if (t.size === 1 && parts[0].type.indexOf('Multi') < 0) return { type:'Multi' + parts[0].type, coordinates: parts.map(p => p.coordinates) };
+    return { type:'GeometryCollection', geometries: parts };
+  }
+  return null;
+}
+function parseKML(txt) {
+  const doc = new DOMParser().parseFromString(txt, 'text/xml');
+  return { type:'FeatureCollection', features: kids(doc, 'Placemark').map(pm => {
+    const props = {}, child = t => [...pm.children].find(c => c.localName === t);
+    if (child('name')) props.name = child('name').textContent.trim();
+    if (child('description')) props.description = child('description').textContent.trim();
+    kids(pm, 'Data').forEach(d => props[d.getAttribute('name')] = (kids(d, 'value')[0] || {}).textContent);
+    kids(pm, 'SimpleData').forEach(d => props[d.getAttribute('name')] = d.textContent);
+    const g = [...pm.children].map(kmlGeom).find(Boolean);
+    return { type:'Feature', properties:props, geometry:g || null };
+  }) };
+}
+function parseGPX(txt) {
+  const doc = new DOMParser().parseFromString(txt, 'text/xml'), feats = [];
+  const ll = p => [parseFloat(p.getAttribute('lon')), parseFloat(p.getAttribute('lat'))];
+  const nm = el => { const n = [...el.children].find(c => c.localName === 'name'); return n ? { name:n.textContent } : {}; };
+  kids(doc, 'wpt').forEach(w => feats.push({ type:'Feature', properties:nm(w), geometry:{ type:'Point', coordinates:ll(w) } }));
+  kids(doc, 'rte').forEach(r => feats.push({ type:'Feature', properties:nm(r), geometry:{ type:'LineString', coordinates:kids(r, 'rtept').map(ll) } }));
+  kids(doc, 'trk').forEach(t => {
+    const segs = kids(t, 'trkseg').map(s => kids(s, 'trkpt').map(ll));
+    feats.push({ type:'Feature', properties:nm(t), geometry: segs.length === 1 ? { type:'LineString', coordinates:segs[0] } : { type:'MultiLineString', coordinates:segs } });
+  });
+  return { type:'FeatureCollection', features:feats };
+}
+function toKML(fc) {
+  const c = p => p[0] + ',' + p[1], cs = a => '<coordinates>' + a.map(c).join(' ') + '</coordinates>';
+  const poly = p => '<Polygon><outerBoundaryIs><LinearRing>' + cs(p[0]) + '</LinearRing></outerBoundaryIs>' +
+    p.slice(1).map(r => '<innerBoundaryIs><LinearRing>' + cs(r) + '</LinearRing></innerBoundaryIs>').join('') + '</Polygon>';
+  const geom = g => {
+    if (!g) return '';
+    switch (g.type) {
+      case 'Point': return '<Point>' + cs([g.coordinates]) + '</Point>';
+      case 'LineString': return '<LineString>' + cs(g.coordinates) + '</LineString>';
+      case 'Polygon': return poly(g.coordinates);
+      case 'MultiPoint': return '<MultiGeometry>' + g.coordinates.map(p => '<Point>' + cs([p]) + '</Point>').join('') + '</MultiGeometry>';
+      case 'MultiLineString': return '<MultiGeometry>' + g.coordinates.map(l => '<LineString>' + cs(l) + '</LineString>').join('') + '</MultiGeometry>';
+      case 'MultiPolygon': return '<MultiGeometry>' + g.coordinates.map(poly).join('') + '</MultiGeometry>';
+      case 'GeometryCollection': return '<MultiGeometry>' + g.geometries.map(geom).join('') + '</MultiGeometry>';
+    }
+    return '';
+  };
+  const pms = fc.features.map((f, i) => {
+    const p = f.properties || {}, name = p.name || p.Name || p.nombre || p.NOMBRE || ('Elemento ' + (i + 1));
+    const ext = Object.keys(p).map(k => '<Data name="' + esc(k) + '"><value>' + esc(p[k]) + '</value></Data>').join('');
+    return '<Placemark><name>' + esc(name) + '</name>' + (ext ? '<ExtendedData>' + ext + '</ExtendedData>' : '') + geom(f.geometry) + '</Placemark>';
+  });
+  return '<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>' + esc(baseName) + '</name>\n' + pms.join('\n') + '\n</Document></kml>';
+}
+
+// ---------- Tablas (CSV / Excel) ----------
+function guess(cols, names) { return cols.find(c => names.includes(c.toLowerCase().trim())) || ''; }
+function fillSelect(sel, cols, val) { sel.innerHTML = '<option value="">—</option>' + cols.map(c => '<option' + (c === val ? ' selected' : '') + '>' + esc(c) + '</option>').join(''); }
+function setupTable(data) {
+  rows = data; const cols = Object.keys(rows[0] || {});
+  const wkt = guess(cols, ['wkt', 'geom', 'geometry', 'geometria', 'geometría', 'the_geom', 'shape']);
+  fillSelect($('colX'), cols, guess(cols, ['lon', 'lng', 'long', 'longitud', 'longitude', 'x', 'coord_x', 'utm_x', 'este']));
+  fillSelect($('colY'), cols, guess(cols, ['lat', 'latitud', 'latitude', 'y', 'coord_y', 'utm_y', 'norte']));
+  fillSelect($('colWkt'), cols, wkt);
+  $('mode').value = wkt ? 'wkt' : 'xy';
+  // Detección automática: valores > 180 => coordenadas UTM
+  const r0 = rows[0], sample = wkt ? parseFloat((String(r0[wkt]).replace(/^SRID=\d+;/i, '').match(/-?\d+(\.\d+)?/) || [])[0]) : num(r0[$('colX').value]);
+  $('crs').value = Math.abs(sample) > 180 ? 'utm' : 'geo'; syncMode();
+  $('tabular').classList.remove('hidden');
+  buildFromTable();
+}
+function num(v) { return typeof v === 'number' ? v : parseFloat(String(v).replace(',', '.')); }
+function buildFromTable() {
+  const mode = $('mode').value, utm = $('crs').value === 'utm', zone = parseInt($('zone').value);
+  const cx = $('colX').value, cy = $('colY').value, cw = $('colWkt').value;
+  if (mode === 'xy' && (!cx || !cy)) return setInfo('Elige las columnas X e Y.', true);
+  if (mode === 'wkt' && !cw) return setInfo('Elige la columna WKT.', true);
+  let bad = 0;
+  const feats = rows.map(r => {
+    let g = null;
+    if (mode === 'xy') { const x = num(r[cx]), y = num(r[cy]); if (!isNaN(x) && !isNaN(y)) g = { type:'Point', coordinates:[x, y] }; }
+    else { try { g = parseWKT(r[cw]); } catch (e) { g = null; } }
+    if (g && utm) g = mapCoords(g, c => utm2geo(c[0], c[1], zone));
+    if (!g) bad++;
+    const props = Object.assign({}, r); if (mode === 'wkt') delete props[cw];
+    return { type:'Feature', properties:props, geometry:g };
+  });
+  loaded({ type:'FeatureCollection', features:feats }, bad ? '\n' + bad + ' filas sin geometría válida' : '');
+}
+function syncMode() {
+  const wkt = $('mode').value === 'wkt';
+  $('xyBox').classList.toggle('hidden', wkt); $('wktBox').classList.toggle('hidden', !wkt);
+  $('zoneBox').classList.toggle('hidden', $('crs').value !== 'utm');
+}
+$('mode').onchange = syncMode; $('crs').onchange = syncMode; $('apply').onclick = buildFromTable;
+
+// ---------- Carga ----------
+function loaded(fc, extra) {
+  FC = fc; preview(fc); enable(fc.features.length > 0);
+  setInfo(summary(fc) + (extra || ''));
+}
+async function handle(file) {
+  if (!file) return;
+  baseName = file.name.replace(/\.[^.]+$/, ''); rows = null; $('tabular').classList.add('hidden');
+  const ext = file.name.split('.').pop().toLowerCase();
+  setInfo('Leyendo ' + file.name + '…');
+  try {
+    if (ext === 'geojson' || ext === 'json') loaded(toFC(JSON.parse(await file.text())));
+    else if (ext === 'kml') loaded(parseKML(await file.text()));
+    else if (ext === 'gpx') loaded(parseGPX(await file.text()));
+    else if (ext === 'zip') loaded(toFC(await shp(await file.arrayBuffer())));
+    else if (['csv', 'txt', 'xlsx', 'xls'].includes(ext)) {
+      const wb = ext === 'xlsx' || ext === 'xls' ? XLSX.read(await file.arrayBuffer()) : XLSX.read(await file.text(), { type:'string', raw:true });
+      const data = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval:'' });
+      if (!data.length) throw new Error('La tabla está vacía');
+      setupTable(data);
+    }
+    else throw new Error('Formato no soportado: .' + ext);
+  } catch (e) { FC = null; enable(false); setInfo('No se pudo leer el archivo: ' + e.message, true); }
+}
+const drop = $('drop'), fileIn = $('file');
+drop.onclick = () => fileIn.click();
+fileIn.onchange = () => handle(fileIn.files[0]);
+['dragenter', 'dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', e => handle(e.dataTransfer.files[0]));
+
+// ---------- Exportación ----------
+function flatRows(fc) {
+  return fc.features.map(f => {
+    const r = Object.assign({}, f.properties || {});
+    if (f.geometry && f.geometry.type === 'Point') { r.lon = f.geometry.coordinates[0]; r.lat = f.geometry.coordinates[1]; }
+    r.wkt = toWKT(f.geometry); return r;
+  });
+}
+document.querySelectorAll('.fmts button').forEach(b => b.onclick = async () => {
+  if (!FC) return;
+  try {
+    const f = b.dataset.f;
+    if (f === 'geojson') download(JSON.stringify(FC), baseName + '.geojson', 'application/geo+json');
+    if (f === 'kml') download(toKML(FC), baseName + '.kml', 'application/vnd.google-earth.kml+xml');
+    if (f === 'csv') download('﻿' + XLSX.utils.sheet_to_csv(XLSX.utils.json_to_sheet(flatRows(FC)), { FS:';' }), baseName + '.csv', 'text/csv');
+    if (f === 'xlsx') { const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(flatRows(FC)), 'datos'); XLSX.writeFile(wb, baseName + '.xlsx'); }
+    if (f === 'shp') {
+      const gc = FC.features.filter(x => x.geometry && x.geometry.type === 'GeometryCollection').length;
+      const fc = { type:'FeatureCollection', features: FC.features.filter(x => x.geometry && x.geometry.type !== 'GeometryCollection')
+        .flatMap(x => x.geometry.type === 'MultiPoint' ? x.geometry.coordinates.map(c => ({ type:'Feature', properties:x.properties, geometry:{ type:'Point', coordinates:c } })) : [x]) };
+      const blob = await shpwrite.zip(fc, { outputType:'blob', folder:baseName });
+      download(blob, baseName + '_shp.zip', 'application/zip');
+      if (gc) setInfo(summary(FC) + '\nAviso: ' + gc + ' geometrías mixtas no se incluyen en el Shapefile.');
+    }
+  } catch (e) { setInfo('Error al exportar: ' + e.message, true); }
+});
+</script>
+</body>
+</html>
