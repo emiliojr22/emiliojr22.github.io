@@ -1,150 +1,127 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-raiz="../" data-herramienta="coordenadas">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Conversor de coordenadas WGS84 y ETRS89 a UTM online | Minitools GIS</title>
-<meta name="description" content="Convierte coordenadas geográficas WGS84 o ETRS89 a UTM y viceversa, gratis y en tu navegador. Haz clic en el mapa para obtener las coordenadas de cualquier punto.">
+<title data-i18n="co.titulo">Conversor de coordenadas WGS84 y ETRS89 a UTM online | Minitools GIS</title>
+<meta name="description" content="Convierte coordenadas geográficas WGS84 o ETRS89 a UTM y viceversa, gratis y en tu navegador. Haz clic en el mapa para obtener las coordenadas de cualquier punto." data-i18n-attr="content:co.desc">
+<meta name="view-transition" content="same-origin">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="stylesheet" href="../assets/estilo.css">
+<script src="../assets/carrusel.js"></script>
 </head>
 <body>
 <header class="barra">
-  <a class="marca" href="../"><svg viewBox="0 0 26 26" aria-hidden="true"><path d="M13 3 23.5 22h-21Z" fill="none" stroke="#1E2B33" stroke-width="2"/><circle cx="13" cy="15.5" r="2.4" fill="#C4372C"/></svg>Minitools GIS</a>
-  <nav aria-label="Herramientas">
-    <a href="../conversor-coordenadas/" aria-current="page">Coordenadas</a>
-    <a href="../conversor-formatos/">Formatos</a>
-  </nav>
+  <a class="marca" href="../" data-dir="atras"><svg viewBox="0 0 26 26" aria-hidden="true"><path d="M13 3 23.5 22h-21Z" fill="none" stroke="#1E2B33" stroke-width="2"/><circle cx="13" cy="15.5" r="2.4" fill="#C4372C"/></svg>Minitools GIS</a>
+  <div class="idioma" role="group" aria-label="Idioma / Language">
+    <button type="button" data-lang="es" lang="es" title="Español">ES</button>
+    <button type="button" data-lang="en" lang="en" title="English">EN</button>
+  </div>
 </header>
 
 <section class="relieve franja" data-relieve>
   <div class="dentro">
     <div class="cajetin">
-      <h1>Conversor de coordenadas</h1>
-      <p>Geográficas WGS84 o ETRS89 a UTM, y de UTM a geográficas.</p>
+      <h1 data-i18n="h.coord">Conversor de coordenadas</h1>
+      <p data-i18n="co.sub">Geográficas WGS84 o ETRS89 a UTM, y de UTM a geográficas.</p>
     </div>
   </div>
 </section>
 
+<nav class="carrusel"></nav>
 <main class="trabajo">
   <div>
     <section class="panel">
-      <h2>De geográficas a UTM</h2>
-      <p class="ayuda">En grados decimales. Al oeste de Greenwich la longitud es negativa.</p>
+      <h2 data-i18n="co.a.tit">De geográficas a UTM</h2>
+      <p class="ayuda" data-i18n="co.a.ayuda">En grados decimales. Al oeste de Greenwich la longitud es negativa.</p>
       <div class="fila">
-        <div><label for="lat">Latitud</label><input id="lat" type="number" step="any" value="40.4168"></div>
-        <div><label for="lon">Longitud</label><input id="lon" type="number" step="any" value="-3.7038"></div>
+        <div><label for="lat" data-i18n="co.lat">Latitud</label><input id="lat" type="number" step="any" value="40.4168"></div>
+        <div><label for="lon" data-i18n="co.lon">Longitud</label><input id="lon" type="number" step="any" value="-3.7038"></div>
       </div>
-      <button class="boton" onclick="geoToUtm()">Convertir a UTM</button>
+      <button class="boton" id="btnUtm" type="button" data-i18n="co.a.boton">Convertir a UTM</button>
       <div class="resultado" id="outUtm" aria-live="polite"></div>
     </section>
 
     <section class="panel">
-      <h2>De UTM a geográficas</h2>
-      <p class="ayuda">En la España peninsular el huso es el 29, 30 o 31; en Canarias, el 28.</p>
+      <h2 data-i18n="co.b.tit">De UTM a geográficas</h2>
+      <p class="ayuda" data-i18n="co.b.ayuda">En la España peninsular el huso es el 29, 30 o 31; en Canarias, el 28.</p>
       <div class="fila">
-        <div><label for="x">X (este), en metros</label><input id="x" type="number" step="any" value="440291"></div>
-        <div><label for="y">Y (norte), en metros</label><input id="y" type="number" step="any" value="4474254"></div>
+        <div><label for="x" data-i18n="co.x">X (este), en metros</label><input id="x" type="number" step="any" value="440291"></div>
+        <div><label for="y" data-i18n="co.y">Y (norte), en metros</label><input id="y" type="number" step="any" value="4474254"></div>
       </div>
       <div class="fila">
-        <div><label for="zone">Huso</label><input id="zone" type="number" min="1" max="60" value="30"></div>
-        <div><label for="hem">Hemisferio</label><select id="hem"><option value="N">Norte</option><option value="S">Sur</option></select></div>
+        <div><label for="zone" data-i18n="co.huso">Huso</label><input id="zone" type="number" min="1" max="60" value="30"></div>
+        <div><label for="hem" data-i18n="co.hem">Hemisferio</label><select id="hem"><option value="N" data-i18n="co.norte">Norte</option><option value="S" data-i18n="co.sur">Sur</option></select></div>
       </div>
-      <button class="boton" onclick="utmToGeo()">Convertir a geográficas</button>
+      <button class="boton" id="btnGeo" type="button" data-i18n="co.b.boton">Convertir a geográficas</button>
       <div class="resultado" id="outGeo" aria-live="polite"></div>
     </section>
   </div>
 
   <section class="mapa">
-    <div class="marco"><div id="map" role="region" aria-label="Mapa"></div></div>
-    <p class="nota">Haz clic en el mapa para rellenar los dos formularios con las coordenadas de ese punto.</p>
+    <div class="marco"><div id="map" role="region" aria-label="Mapa" data-i18n-attr="aria-label:mapa"></div></div>
+    <p class="nota" data-i18n="co.nota">Haz clic en el mapa para rellenar los dos formularios con las coordenadas de ese punto.</p>
   </section>
 </main>
 
 <footer class="pie">
   <span>Minitools GIS, 2026</span>
-  <span>Cálculo con el elipsoide WGS84. La diferencia con ETRS89 (GRS80) es inferior al milímetro.</span>
+  <span data-i18n="co.pie">Cálculo con el elipsoide WGS84. La diferencia con ETRS89 (GRS80) es inferior al milímetro.</span>
 </footer>
-<script src="../assets/curvas.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="../assets/i18n.js"></script>
+<script src="../assets/geo.js"></script>
+
+<script src="../assets/curvas.js"></script>
 <script>
-// --- Transformación UTM (fórmulas de Krüger / USGS) ---
-const a = 6378137, f = 1/298.257223563, k0 = 0.9996;
-const e2 = f*(2-f), ep2 = e2/(1-e2), rad = Math.PI/180;
-
-function toUtm(lat, lon) {
-  const zone = Math.floor((lon + 180)/6) + 1;
-  const lon0 = ((zone-1)*6 - 180 + 3) * rad;
-  const phi = lat*rad, lam = lon*rad;
-  const N = a/Math.sqrt(1 - e2*Math.sin(phi)**2);
-  const T = Math.tan(phi)**2, C = ep2*Math.cos(phi)**2, A = Math.cos(phi)*(lam - lon0);
-  const M = a*((1 - e2/4 - 3*e2**2/64 - 5*e2**3/256)*phi
-            - (3*e2/8 + 3*e2**2/32 + 45*e2**3/1024)*Math.sin(2*phi)
-            + (15*e2**2/256 + 45*e2**3/1024)*Math.sin(4*phi)
-            - (35*e2**3/3072)*Math.sin(6*phi));
-  const x = k0*N*(A + (1-T+C)*A**3/6 + (5-18*T+T**2+72*C-58*ep2)*A**5/120) + 500000;
-  let y = k0*(M + N*Math.tan(phi)*(A**2/2 + (5-T+9*C+4*C**2)*A**4/24 + (61-58*T+T**2+600*C-330*ep2)*A**6/720));
-  if (lat < 0) y += 10000000;
-  return { x, y, zone, hem: lat >= 0 ? 'N' : 'S' };
-}
-
-function toGeo(x, y, zone, hem) {
-  x -= 500000; if (hem === 'S') y -= 10000000;
-  const lon0 = ((zone-1)*6 - 180 + 3) * rad;
-  const M = y/k0, mu = M/(a*(1 - e2/4 - 3*e2**2/64 - 5*e2**3/256));
-  const e1 = (1 - Math.sqrt(1-e2))/(1 + Math.sqrt(1-e2));
-  const phi1 = mu + (3*e1/2 - 27*e1**3/32)*Math.sin(2*mu) + (21*e1**2/16 - 55*e1**4/32)*Math.sin(4*mu)
-             + (151*e1**3/96)*Math.sin(6*mu) + (1097*e1**4/512)*Math.sin(8*mu);
-  const N1 = a/Math.sqrt(1 - e2*Math.sin(phi1)**2), T1 = Math.tan(phi1)**2, C1 = ep2*Math.cos(phi1)**2;
-  const R1 = a*(1-e2)/Math.pow(1 - e2*Math.sin(phi1)**2, 1.5), D = x/(N1*k0);
-  const lat = phi1 - (N1*Math.tan(phi1)/R1)*(D**2/2 - (5+3*T1+10*C1-4*C1**2-9*ep2)*D**4/24
-            + (61+90*T1+298*C1+45*T1**2-252*ep2-3*C1**2)*D**6/720);
-  const lon = lon0 + (D - (1+2*T1+C1)*D**3/6 + (5-2*C1+28*T1-3*C1**2+8*ep2+24*T1**2)*D**5/120)/Math.cos(phi1);
-  return { lat: lat/rad, lon: lon/rad };
-}
-
-// --- Interfaz ---
+const $ = id => document.getElementById(id);
 const map = L.map('map').setView([40.4168, -3.7038], 6);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, attribution:'© OpenStreetMap' }).addTo(map);
-const marker = L.circleMarker([40.4168, -3.7038], { radius:7, color:'#C4372C', weight:2, fillColor:'#C4372C', fillOpacity:.85 }).addTo(map);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(map);
+const marca = L.circleMarker([40.4168, -3.7038], { radius: 7, color: '#C4372C', weight: 2, fillColor: '#C4372C', fillOpacity: .85 }).addTo(map);
+let ultUtm = null, ultGeo = null;
 
-function show(lat, lon) {
-  const u = toUtm(lat, lon);
-  document.getElementById('outUtm').textContent =
-    'Huso ' + u.zone + u.hem + '\nX = ' + u.x.toFixed(2) + ' m\nY = ' + u.y.toFixed(2) + ' m';
-  marker.setLatLng([lat, lon]);
-  return u;
+function pintarUtm(u) {
+  ultUtm = u;
+  $('outUtm').textContent = u.error ? '⚠ ' + t(u.error) :
+    t('co.huso') + ' ' + u.huso + u.hem + '\nX = ' + u.x.toFixed(2) + ' m\nY = ' + u.y.toFixed(2) + ' m';
 }
-function geoToUtm() {
-  const lat = parseFloat(document.getElementById('lat').value), lon = parseFloat(document.getElementById('lon').value);
-  if (isNaN(lat) || isNaN(lon) || Math.abs(lat) > 84) return alertOut('outUtm', 'Coordenadas no válidas (UTM: latitud entre -80º y 84º)');
-  show(lat, lon); map.setView([lat, lon], 12);
+function pintarGeo(g) {
+  ultGeo = g;
+  $('outGeo').textContent = g.error ? '⚠ ' + t(g.error) :
+    t('co.lat') + ' = ' + g.lat.toFixed(7) + 'º\n' + t('co.lon') + ' = ' + g.lon.toFixed(7) + 'º';
 }
-function utmToGeo() {
-  const x = parseFloat(document.getElementById('x').value), y = parseFloat(document.getElementById('y').value);
-  const zone = parseInt(document.getElementById('zone').value), hem = document.getElementById('hem').value;
-  if (isNaN(x) || isNaN(y) || !(zone >= 1 && zone <= 60)) return alertOut('outGeo', 'Datos no válidos');
-  const g = toGeo(x, y, zone, hem);
-  document.getElementById('outGeo').textContent = 'Latitud  = ' + g.lat.toFixed(7) + 'º\nLongitud = ' + g.lon.toFixed(7) + 'º';
-  marker.setLatLng([g.lat, g.lon]); map.setView([g.lat, g.lon], 12);
+function geoAUtm(mover) {
+  const lat = parseFloat($('lat').value), lon = parseFloat($('lon').value);
+  if (isNaN(lat) || isNaN(lon) || lat < -80 || lat > 84 || Math.abs(lon) > 180) return pintarUtm({ error: 'co.err.geo' });
+  pintarUtm(Geo.aUtm(lat, lon));
+  marca.setLatLng([lat, lon]);
+  if (mover) map.setView([lat, lon], 12);
 }
-function alertOut(id, msg) { document.getElementById(id).textContent = '⚠ ' + msg; }
+function utmAGeo() {
+  const x = parseFloat($('x').value), y = parseFloat($('y').value);
+  const huso = parseInt($('zone').value, 10), hem = $('hem').value;
+  if (isNaN(x) || isNaN(y) || !(huso >= 1 && huso <= 60)) return pintarGeo({ error: 'co.err.utm' });
+  const g = Geo.aGeo(x, y, huso, hem);
+  pintarGeo(g);
+  marca.setLatLng([g.lat, g.lon]); map.setView([g.lat, g.lon], 12);
+}
+$('btnUtm').addEventListener('click', () => geoAUtm(true));
+$('btnGeo').addEventListener('click', utmAGeo);
 
 map.on('click', e => {
   const { lat, lng } = e.latlng;
-  document.getElementById('lat').value = lat.toFixed(7);
-  document.getElementById('lon').value = lng.toFixed(7);
-  const u = show(lat, lng);
-  document.getElementById('x').value = u.x.toFixed(2);
-  document.getElementById('y').value = u.y.toFixed(2);
-  document.getElementById('zone').value = u.zone;
-  document.getElementById('hem').value = u.hem;
-  document.getElementById('outGeo').textContent = 'Latitud  = ' + lat.toFixed(7) + 'º\nLongitud = ' + lng.toFixed(7) + 'º';
+  $('lat').value = lat.toFixed(7); $('lon').value = lng.toFixed(7);
+  const u = Geo.aUtm(lat, lng);
+  pintarUtm(u); marca.setLatLng([lat, lng]);
+  $('x').value = u.x.toFixed(2); $('y').value = u.y.toFixed(2); $('zone').value = u.huso; $('hem').value = u.hem;
+  pintarGeo({ lat: lat, lon: lng });
 });
-geoToUtm();
+document.addEventListener('idioma', () => { if (ultUtm) pintarUtm(ultUtm); if (ultGeo) pintarGeo(ultGeo); });
+geoAUtm(false);
+
 </script>
 </body>
 </html>
